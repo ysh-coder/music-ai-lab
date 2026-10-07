@@ -28,14 +28,14 @@ let isMusicPlaying = false;
 const GAS_API_URL = "https://script.google.com/macros/s/AKfycbw6ks-67_DiwUgci6kTyDeBjOOwWCl07kQR_K0awfEd9o98NhKCJMSLEawqmzB1UTJk/exec";
 
 // =========================================
-// 👦👧 10 張卡牌題庫 (補上 prompt 屬性，防 Suno 讀取出錯)
+// 👦👧 10 張卡牌題庫
 // =========================================
 const moodDatabase = [
     { title: "快樂動物園", img: "快樂動物園.jfif", desc: "充滿動物叫聲與輕快跳躍的節奏。", prompt: "happy animals, upbeat and light jumping rhythms, safari, playful vibe" },
     { title: "遊樂園探險", img: "旋轉木馬.jfif", desc: "像旋轉木馬一樣，充滿歡笑聲的音樂。", prompt: "amusement park adventure, carousel, carousel waltz, cheerful brass" },
     { title: "魔法森林", img: "魔法森林.jfif", desc: "閃閃發光、有小精靈飛舞的神奇感覺。", prompt: "mystic magical forest, sparkling lights, flying fairies, mysterious and enchanted woodwinds" },
     { title: "宇宙探險", img: "宇宙探險.jfif", desc: "穿上太空衣飛向星星！神祕的宇宙飛行。", prompt: "cosmic space exploration, floating in zero gravity, starry synth, mystery voyage" },
-    { title: "甜甜夢鄉", img: "甜甜夢鄉.jfif", desc: "溫柔、安靜，像搖籃曲一樣哄你睡覺。", prompt: "sweet dreams, gentle lullaby, quiet sleeping theme, soft warm piano" },
+    { title: "甜甜夢鄉", img: "甜甜夢鄉.jfif", desc: "溫柔、安靜，像搖籃曲一樣哄你睡        。", prompt: "sweet dreams, gentle lullaby, quiet sleeping theme, soft warm piano" },
     { title: "熱血運動會", img: "熱血運動會.jfif", desc: "充滿活力、大家一起加油的開心節奏！", prompt: "energetic sports day, fast racing beat, cheering crowd, triumphant brass" },
     { title: "下雨的窗邊", img: "下雨的窗邊.jfif", desc: "滴滴答答的雨聲，適合安靜畫畫的放鬆音樂。", prompt: "rainy window, gentle pitter-patter water droplets, cozy lofi chillhop, relaxing piano" },
     { title: "海底世界", img: "海底世界.jfif", desc: "像小魚游來游去、泡泡咕嚕咕嚕的聲音。", prompt: "underwater deep sea, floating colorful fish, bubbling water effects, ethereal harp" },
@@ -43,7 +43,7 @@ const moodDatabase = [
     { title: "生日派對", img: "生日派對.jfif", desc: "開心、熱鬧，準備吹蠟燭吃蛋糕的慶祝時光。", prompt: "birthday party, celebration, blowing candles, happy acoustic guitar, festive bells" }
 ];
 
-// 本地備用數據（當網路載入失敗時顯示）
+// 本地備用數據
 let inspirationWall = [
     { name: "魔法學徒小華", mood: "魔法森林", url: "https://suno.com/song/demo-1", solveScore: "5.0" }
 ];
@@ -88,14 +88,12 @@ if (musicToggle) {
     });
 }
 
-// 🃏 抽卡點擊：確保先展示背面，絕不提前露餡
+// 🃏 抽卡點擊
 deckCards.forEach(card => {
     card.addEventListener('click', () => {
         const selectedMood = moodDatabase[Math.floor(Math.random() * moodDatabase.length)];
         
-        // 1. 確保卡片重設為未翻牌狀態 (背面朝上)
         if (moodCard) moodCard.classList.remove('flipped');
-        // 2. 寫入抽卡資料
         if (moodImg) moodImg.src = selectedMood.img;
         if (moodTitle) moodTitle.innerText = selectedMood.title;
         if (moodDesc) moodDesc.innerText = selectedMood.desc;
@@ -103,10 +101,9 @@ deckCards.forEach(card => {
         adventureState.moodTitle = selectedMood.title;
         adventureState.moodPrompt = selectedMood.prompt;
 
-        // 3. 隱藏 5 張小牌，展示中央大牌
         if (deckArea) deckArea.classList.add('hidden-area');
         if (singleCardArea) singleCardArea.classList.remove('hidden-area');
-        // 4. 停頓 250ms，優雅翻轉揭曉
+        
         setTimeout(() => {
             if (moodCard) moodCard.classList.add('flipped');
             setTimeout(() => {
@@ -138,26 +135,71 @@ if (copyPromptBtn) {
     });
 }
 
-// 🔮 點擊上傳作品，實時 POST 寫入 Google 試算表
+// 🔗 快捷載入剪貼簿連結 (介面完全不顯示網址)
+const quickPasteBtn = document.getElementById('quickPasteBtn');
+if (quickPasteBtn) {
+    quickPasteBtn.addEventListener('click', async () => {
+        try {
+            const text = await navigator.clipboard.readText();
+            if (text && text.startsWith("http")) {
+                document.getElementById('sunoUrlInput').value = text.trim();
+                document.getElementById('urlStatusText').style.display = 'block';
+                quickPasteBtn.innerText = "✅ 已成功載入音樂連結！";
+                quickPasteBtn.style.borderColor = "#4ade80";
+                quickPasteBtn.style.color = "#4ade80";
+                return;
+            }
+        } catch(err) {}
+
+        const manualUrl = prompt("請貼上你在 Suno 複製的歌曲分享連結：");
+        if (manualUrl && manualUrl.startsWith("http")) {
+            document.getElementById('sunoUrlInput').value = manualUrl.trim();
+            document.getElementById('urlStatusText').style.display = 'block';
+            quickPasteBtn.innerText = "✅ 已成功載入音樂連結！";
+            quickPasteBtn.style.borderColor = "#4ade80";
+            quickPasteBtn.style.color = "#4ade80";
+        }
+    });
+}
+
+// 🔮 點擊上傳作品至 Google 試算表
 const uploadWallBtn = document.getElementById('uploadWallBtn');
 if (uploadWallBtn) {
     uploadWallBtn.addEventListener('click', async () => {
         const nameInput = document.getElementById('authorName');
         const urlInput = document.getElementById('sunoUrlInput');
         const name = nameInput ? nameInput.value.trim() : "";
-        const sunoUrl = urlInput ? urlInput.value.trim() : "";
-        const finalSolveScore = Math.min(adventureState.solveScore, 5).toFixed(1);
+        let sunoUrl = urlInput ? urlInput.value.trim() : "";
 
         if(name === "") {
             alert("🧙‍♂️ 魔法師翁sir：請確定輸入了你的學徒代號喔！");
             return;
         }
-        if(sunoUrl === "" || !sunoUrl.startsWith("http")) {
-            alert("🧙‍♂️ 魔法師翁sir：請貼上正確的 Suno 歌曲連結！");
-            return;
+
+        // 若尚未點擊載入連結，自動嘗試讀取或提示一次
+        if(!sunoUrl || !sunoUrl.startsWith("http")) {
+            try {
+                const clipText = await navigator.clipboard.readText();
+                if (clipText && clipText.startsWith("http")) {
+                    sunoUrl = clipText.trim();
+                    if (urlInput) urlInput.value = sunoUrl;
+                }
+            } catch(e) {}
         }
 
-        // 鎖定按鈕防止重複提交
+        if(!sunoUrl || !sunoUrl.startsWith("http")) {
+            const promptUrl = prompt("🧙‍♂️ 魔法師翁sir：請貼上你的 Suno 歌曲分享連結：");
+            if (promptUrl && promptUrl.startsWith("http")) {
+                sunoUrl = promptUrl.trim();
+                if (urlInput) urlInput.value = sunoUrl;
+            } else {
+                alert("🧙‍♂️ 魔法師翁sir：需要有 Suno 歌曲連結才能生成二維碼與刻入石碑喔！");
+                return;
+            }
+        }
+
+        const finalSolveScore = Math.min(adventureState.solveScore, 5).toFixed(1);
+
         uploadWallBtn.disabled = true;
         uploadWallBtn.innerText = "⏳ 正在刻入試算表石碑...";
 
@@ -169,21 +211,17 @@ if (uploadWallBtn) {
         };
 
         try {
-            // 使用 text/plain 發送避免 GAS 的 CORS 預檢問題
             await fetch(GAS_API_URL, {
                 method: "POST",
                 mode: "no-cors",
-                headers: {
-                    "Content-Type": "text/plain"
-                },
+                headers: { "Content-Type": "text/plain" },
                 body: JSON.stringify(payload)
             });
 
-            // 為了確保寫入延遲，等候一小段時間再拉取最新數據
             setTimeout(async () => {
                 if (ffCanvasContainer) ffCanvasContainer.style.opacity = "1";
                 playRitualFanfare(); 
-                await fetchWallData(); // 重新拉取並重新生成二維碼
+                await fetchWallData(); 
                 showPage(page5);
                 uploadWallBtn.disabled = false;
                 uploadWallBtn.innerText = "🔮 刻入魔法石碑 (生成二維碼)";
@@ -197,7 +235,7 @@ if (uploadWallBtn) {
     });
 }
 
-// 🃏 重新抽卡：徹底重置背面與清空內容，防露餡
+// 🃏 重新抽卡
 if (reDrawBtn) {
     reDrawBtn.addEventListener('click', () => {
         if (moodCard) moodCard.classList.remove('flipped');
@@ -206,7 +244,6 @@ if (reDrawBtn) {
         setTimeout(() => {
             if (singleCardArea) singleCardArea.classList.add('hidden-area');
             if (deckArea) deckArea.classList.remove('hidden-area');
-            // 清空內容，杜絕任何快取露餡
             if (moodImg) moodImg.src = "";
             if (moodTitle) moodTitle.innerText = "";
             if (moodDesc) moodDesc.innerText = "";
@@ -218,7 +255,7 @@ const viewWallBtn = document.getElementById('viewWallBtn');
 if (viewWallBtn) {
     viewWallBtn.addEventListener('click', async () => { 
         if (ffCanvasContainer) ffCanvasContainer.style.opacity = "1";
-        await fetchWallData(); // 參觀靈感牆時拉取最新數據
+        await fetchWallData(); 
         showPage(page5); 
     });
 }
@@ -527,10 +564,9 @@ async function fetchWallData() {
     try {
         const res = await fetch(GAS_API_URL);
         const data = await res.json();
-        inspirationWall = data; // 用雲端讀取的數據覆蓋本地變數
+        inspirationWall = data;
         renderWall();
     } catch(err) {
-        // 如果網路異常，回退使用本地內存數據，防止畫面破裂
         wall.innerHTML = "<p style='color:#f87171; grid-column: 1/-1;'>未能與雲端同步，改為讀取備用數據中...</p>";
         setTimeout(() => {
             renderWall();
@@ -538,7 +574,7 @@ async function fetchWallData() {
     }
 }
 
-// 🎨 核心優化：將 Suno 原始連結網址完全隱藏，整合為「📱 點擊或掃描聽音樂」的點擊超連結
+// 🎨 渲染靈感牆：網址已隱藏，點擊文字直接聽歌
 function renderWall() {
     const wall = document.getElementById('wallContainer');
     if (!wall) return;
@@ -549,7 +585,6 @@ function renderWall() {
         return;
     }
 
-    // 倒序排列，讓最新上傳的學生作品顯示在最前面
     [...inspirationWall].reverse().forEach((item, index) => {
         const card = document.createElement('div');
         card.className = "wall-item";
@@ -561,7 +596,6 @@ function renderWall() {
             </div>
             <div class="qr-wrapper"><canvas id="qr-${index}" class="qr-canvas"></canvas></div>
             
-            <!-- 🔗 網址優化超連結 -->
             <p style="font-size: 0.8rem; margin-top: 5px;">
                 <a href="${item.url}" target="_blank" style="color: #a855f7; text-decoration: underline; font-weight: bold;">
                     📱 點擊或掃描聽音樂
@@ -639,7 +673,6 @@ function initFF3DBackground() {
         container.innerHTML = '';
         container.appendChild(renderer.domElement);
 
-        // 1. 3D 水晶核心
         const crystalGeo = new THREE.OctahedronGeometry(110, 0);
         const crystalMat = new THREE.MeshBasicMaterial({
             color: 0x67e8f9, wireframe: true, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending
@@ -654,7 +687,6 @@ function initFF3DBackground() {
         const innerCrystal = new THREE.Mesh(innerGeo, innerMat);
         crystalMesh.add(innerCrystal);
 
-        // 2. 加粗立體星環
         outerRingsGroup = new THREE.Group();
         const ringConfigs = [
             { radius: 210, width: 12, color: 0x38bdf8, rx: 1.1, ry: 0.3 },
@@ -673,7 +705,6 @@ function initFF3DBackground() {
         });
         scene.add(outerRingsGroup);
 
-        // 3. 1200 顆柔光星塵
         const starCount = 1200;
         const starGeo = new THREE.BufferGeometry();
         const starPos = new Float32Array(starCount * 3);
@@ -695,7 +726,6 @@ function initFF3DBackground() {
         starField = new THREE.Points(starGeo, starMat);
         scene.add(starField);
 
-        // 4. 底部 3D 水晶流動網格海浪
         const waveGeo = new THREE.PlaneGeometry(1600, 1000, 32, 24);
         const waveMat = new THREE.MeshBasicMaterial({
             color: 0x1e3a8a, wireframe: true, transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending
@@ -752,10 +782,9 @@ function animateFFBackground() {
     } catch(e){}
 }
 
-// 💡 DOM 載入完畢後，執行背景初始化並直接拉取 Google 試算表的最新歷史數據
 window.addEventListener('DOMContentLoaded', () => {
     try {
         initFF3DBackground();
-        fetchWallData(); // 自動讀取 Google 試算表
+        fetchWallData();
     } catch(e){}
 });
