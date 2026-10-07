@@ -48,7 +48,7 @@ body {
     z-index: 10; 
     max-height: 92vh; 
     overflow-y: auto; 
-    -webkit-overflow-scrolling: touch; /* 🍎 讓 iOS/Safari 觸控滑動更滑順 */
+    -webkit-overflow-scrolling: touch; 
     border-radius: 24px;
 }
 
@@ -197,6 +197,7 @@ button {
     -webkit-backface-visibility: hidden;
 }
 
+/* 🃏 卡牌背面 */
 .card-back-design { 
     padding: 0 !important; 
     background: #000 !important; 
@@ -209,18 +210,14 @@ button {
 }
 .full-card-back-img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-/* 🌟 核心排版修復：將正面的卡片設計優化成精緻的一體化魔法塔羅卡片，消除原本零散感 */
+/* 🃏 卡牌正面：【完全修正】100%滿版無縫展示原始卡牌，無多餘留白與邊框 */
 .card-front-design { 
-    background: linear-gradient(180deg, #111827 0%, #070a13 100%) !important; 
-    border: 3px double #d946ef !important; /* 帶有神秘感的雙軌粉金魔法邊框 */
-    box-shadow: 0 14px 35px rgba(217, 70, 239, 0.25), inset 0 0 20px rgba(217, 70, 239, 0.15) !important;
+    padding: 0 !important; 
+    background: #000 !important; 
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    box-shadow: 0 14px 35px rgba(0, 0, 0, 0.6);
     transform: rotateY(180deg); 
     -webkit-transform: rotateY(180deg);
-    padding: 12px !important;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
     overflow: hidden;
     z-index: 1;
     opacity: 0;
@@ -239,42 +236,28 @@ button {
     transition: opacity 0.3s ease 0.3s;
 }
 
-/* 精細化卡片內插畫區，並加上古銅金色圓角內框 */
+/* 讓圖片容器撐滿整張卡片 */
 .mood-img-wrap { 
-    width: 100%; 
-    height: 195px; 
-    border-radius: 8px; 
+    width: 100% !important; 
+    height: 100% !important; 
+    border-radius: 12px; 
     overflow: hidden; 
     background: #000; 
-    border: 2px solid #ffd700; /* 古銅金內邊框 */
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    border: none !important;
+    box-shadow: none !important;
 }
-.mood-card-img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-/* 🔮 魔法文字屬性看板區（不再有純文字的零散感） */
+/* 圖片完全填滿卡面，保留原圖所有細節與自帶文字 */
+.mood-card-img { 
+    width: 100% !important; 
+    height: 100% !important; 
+    object-fit: cover !important; 
+    display: block; 
+}
+
+/* 💡 徹底隱藏 HTML 重複的標題與描述，完全由原圖呈現 */
 .mood-info { 
-    width: 100%; 
-    text-align: center; 
-    padding: 8px 6px; 
-    background: rgba(147, 197, 253, 0.05);
-    border: 1px dashed rgba(217, 70, 239, 0.4);
-    border-radius: 6px;
-    margin-top: 8px;
-}
-#moodTitle { 
-    color: #ffd700; /* 卡片名稱使用純金色 */
-    font-size: 1.15rem; 
-    margin-bottom: 4px; 
-    font-weight: 700; 
-    letter-spacing: 1.5px; 
-    text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
-}
-.mood-desc { 
-    color: #cbd5e1; 
-    font-size: 0.8rem; 
-    line-height: 1.4; 
-    margin-bottom: 0; 
-    font-weight: 500;
+    display: none !important; 
 }
 
 /* 🎮 8-bit 復古文字冒險風格 */
