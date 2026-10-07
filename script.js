@@ -138,7 +138,7 @@ if (copyPromptBtn) {
     });
 }
 
-// 🔮 核心修改：點擊上傳作品，實時 POST 寫入 Google 試算表
+// 🔮 點擊上傳作品，實時 POST 寫入 Google 試算表
 const uploadWallBtn = document.getElementById('uploadWallBtn');
 if (uploadWallBtn) {
     uploadWallBtn.addEventListener('click', async () => {
@@ -518,7 +518,7 @@ function triggerEvaluationReveal() {
     if (evalTextEl) typeWriterEffect(evalTextEl, evalDialogue, 30);
 }
 
-// 🔮 核心修改：異步向 Google 試算表拉取最新數據
+// 🔮 異步向 Google 試算表拉取最新數據
 async function fetchWallData() {
     const wall = document.getElementById('wallContainer');
     if (!wall) return;
@@ -538,6 +538,7 @@ async function fetchWallData() {
     }
 }
 
+// 🎨 核心優化：將 Suno 原始連結網址完全隱藏，整合為「📱 點擊或掃描聽音樂」的點擊超連結
 function renderWall() {
     const wall = document.getElementById('wallContainer');
     if (!wall) return;
@@ -559,7 +560,13 @@ function renderWall() {
                 <p style="margin-bottom:0; color: #e0f2fe;">🔍 探究解難能力: ${item.solveScore} / 5 分</p>
             </div>
             <div class="qr-wrapper"><canvas id="qr-${index}" class="qr-canvas"></canvas></div>
-            <p style="font-size: 0.8rem; color: #a855f7;">📱 掃描聽音樂</p>
+            
+            <!-- 🔗 網址優化超連結 -->
+            <p style="font-size: 0.8rem; margin-top: 5px;">
+                <a href="${item.url}" target="_blank" style="color: #a855f7; text-decoration: underline; font-weight: bold;">
+                    📱 點擊或掃描聽音樂
+                </a>
+            </p>
         `;
         wall.appendChild(card);
         setTimeout(() => {
