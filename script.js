@@ -1,5 +1,5 @@
 // =================================================================
-// 🛡️ 優先綁定所有 DOM 元素與事件 (確保按鈕 100% 隨時可點擊)
+// 🛡️ 優先綁定所有 DOM 元素
 // =================================================================
 const page1 = document.getElementById('page1');
 const pageCard = document.getElementById('page-card'); 
@@ -28,7 +28,7 @@ let isMusicPlaying = false;
 const GAS_API_URL = "https://script.google.com/macros/s/AKfycbw6ks-67_DiwUgci6kTyDeBjOOwWCl07kQR_K0awfEd9o98NhKCJMSLEawqmzB1UTJk/exec";
 
 // =========================================
-// 👦👧 10 張卡牌題庫
+// 👦👧 10 張卡牌題庫基礎定義
 // =========================================
 const moodDatabase = [
     { title: "快樂動物園", img: "快樂動物園.jfif", desc: "充滿動物叫聲與輕快跳躍的節奏。" },
@@ -43,7 +43,6 @@ const moodDatabase = [
     { title: "生日派對", img: "生日派對.jfif", desc: "開心、熱鬧，準備吹蠟燭吃蛋糕的慶祝時光。" }
 ];
 
-// 本地備用數據
 let inspirationWall = [
     { name: "魔法學徒小華", mood: "魔法森林", url: "https://suno.com/song/demo-1", solveScore: "5" }
 ];
@@ -56,579 +55,128 @@ let adventureState = {
     tempo: "", 
     step: 0, 
     solveScore: 0,
-    tags: [] // 儲存12題選擇產生的 Suno 關鍵字
+    tags: []
 };
 
 // =========================================
-// 🎓 10 主題 × 12 題 (共 120 題) 小六專屬題庫
+// 🎓 10 主題 × 12 關專屬題庫架構
 // =========================================
-const specializedQuestionBanks = {
-    "熱血運動會": [
-        {
-            systemText: "【第一關：音樂心跳 (速度)】在起跑線準備衝刺了！這首接力賽配樂，心跳應該有多快？",
-            choices: [
-                { text: "運輸散步 (慢慢的，慢板)", score: 0.5, tag: "slow walking tempo", sound: "Slow tempo" },
-                { text: "🚶 慢跑熱身 (中等速度，行板)", score: 1.0, tag: "moderate jogging tempo, 100 bpm", sound: "Moderate tempo" },
-                { text: "🏃 終點衝刺 (非常快，急板)", score: 1.5, tag: "fast upbeat tempo, energetic, 138 bpm", sound: "Fast tempo" }
-            ]
-        },
-        {
-            systemText: "【第二關：身體步伐 (拍號)】整齊地踏著步伐進場，哪種拍子最像體育進行曲？",
-            choices: [
-                { text: "🥁 一二、一二 (咚噠、咚噠，兩拍子)", score: 1.5, tag: "marching 2/4 beat, steady steps", sound: "music" },
-                { text: "💃 轉圈圈 (咚噠噠、咚噠噠，三拍子)", score: 0.5, tag: "swaying 3/4 waltz beat", sound: "music" },
-                { text: "👻 拍子亂亂的，完全沒有規律", score: 0.2, tag: "chaotic irregular meter", sound: "ice" }
-            ]
-        },
-        {
-            systemText: "【第三關：前進動力 (節奏型)】為了幫跑步的同學加油，底層的鼓點節奏要怎麼設計？",
-            choices: [
-                { text: "⚡ 連續、不停歇的快速小鼓點", score: 1.5, tag: "driving fast rhythmic drum pattern, constant snare rolls", sound: "Fast tempo" },
-                { text: "☁️ 拖得很長、很慢的單音", score: 0.5, tag: "long slow sustained tones", sound: "Slow tempo" },
-                { text: "🐢 每隔好幾秒才敲一下", score: 0.3, tag: "occasional sparse single hits", sound: "Slow tempo" }
-            ]
-        },
-        {
-            systemText: "【第四關：音樂顏色 (調性)】我們在陽光下拿到金牌了！這時候音樂的顏色應該是？",
-            choices: [
-                { text: "☀️ 陽光大調 (開心又明亮)", score: 1.5, tag: "bright and happy Major Key, celebratory", sound: "Major Key" },
-                { text: "🌑 藍色小調 (雨天一樣藍色憂傷)", score: 0.5, tag: "sad nostalgic minor key", sound: "Minor Key" },
-                { text: "🏮 東方仙境五聲音階", score: 0.8, tag: "mystic oriental pentatonic scale", sound: "Pentatonic" }
-            ]
-        },
-        {
-            systemText: "【第五關：緊張氣氛 (和聲)】兩位同學同時衝線！裁判看重播時，音樂如何營造緊張感？",
-            choices: [
-                { text: "☕ 聽起來很舒服、很和和諧的鋼琴聲", score: 0.5, tag: "peaceful sweet harmony", sound: "Piano" },
-                { text: "🔥 有點刺耳撞擊的『緊張不和諧音』", score: 1.5, tag: "dramatic tense harmony, suspenseful chords", sound: "fire" },
-                { text: "💤 溫柔的催眠曲和聲", score: 0.3, tag: "soft sleep lullaby harmony", sound: "Piano" }
-            ]
-        },
-        {
-            systemText: "【第六關：天空呼喊 (音區)】金牌頒獎典禮開始，全場大聲歡呼！旋律高度該怎麼安排？",
-            choices: [
-                { text: "🦅 很高、很響亮的高音區 (衝上雲霄)", score: 1.5, tag: "high register melodies, soaring and bright", sound: "ice" },
-                { text: "🦁 很低、很沉重的低音區 (像巨獸腳步)", score: 0.5, tag: "deep low bass notes rumble", sound: "fire" },
-                { text: "🚶 在中間，聽起來平平淡淡的", score: 0.8, tag: "mellow middle register", sound: "music" }
-            ]
-        },
-        {
-            systemText: "【第七關：勝利法器 (主奏)】要代表勝利的號角聲，哪一種樂器法器最有精神？",
-            choices: [
-                { text: "🎺 亮晶晶的小號和法國號 (銅管)", score: 1.5, tag: "triumphant brass fanfare, bright trumpets", sound: "Brass" },
-                { text: "🎻 溫柔的小提琴 (弦樂器)", score: 0.8, tag: "gentle strings ensemble", sound: "Strings" },
-                { text: "🌬️ 軟綿綿的雙簧管 (木管樂器)", score: 0.6, tag: "soft oboe solos", sound: "Woodwinds" }
-            ]
-        },
-        {
-            systemText: "【第八關：看台音效 (特效)】聽！觀眾席傳來了最真實的動態，加入什麼背景聲音？",
-            choices: [
-                { text: "🗣️ 全校同學們排山倒海的歡呼與哨子聲", score: 1.5, tag: "stadium cheers, crowd shouting, whistling background", sound: "music" },
-                { text: "🌲 森林裡的鳥叫聲與流水聲", score: 0.5, tag: "forest nature birds chirping soundscape", sound: "Woodwinds" },
-                { text: "🌧️ 催眠的雨滴滴答聲", score: 0.3, tag: "cozy rain fall sound effects", sound: "Piano" }
-            ]
-        },
-        {
-            systemText: "【第九關：樂器隊伍 (織體)】頒獎啦！這時候發出的魔法音樂，樂器隊伍有多少人？",
-            choices: [
-                { text: "🏰 全校管弦樂團大齊奏 (厚實宏大)", score: 1.5, tag: "grand full school band tutti orchestra texture", sound: "Brass" },
-                { text: "🚶 只有一位同學吹牧童笛 (單薄孤單)", score: 0.5, tag: "single solo instrument, sparse texture", sound: "Woodwinds" },
-                { text: "👏 只有一個人在拍手", score: 0.2, tag: "only bare hand claps", sound: "music" }
-            ]
-        },
-        {
-            systemText: "【第十關：爆發力度 (力度)】拿到獎盃的那一瞬間！音樂的音量要怎麼控制？",
-            choices: [
-                { text: "📢 突然變得非常大聲 (突強爆發！)", score: 1.5, tag: "loud blast, sudden strong sforzando accent", sound: "fire" },
-                { text: "🍃 越來越小聲，最後聽不見 (漸弱)", score: 0.5, tag: "gradual decrescendo to silence", sound: "Slow tempo" },
-                { text: "🤫 一直保持非常小聲，像講悄悄話", score: 0.3, tag: "very soft volume, quiet whispers", sound: "Slow tempo" }
-            ]
-        },
-        {
-            systemText: "【第十一關：歌聲精靈 (人聲)】為了讓這首運動會歌曲更有動感，歌聲精靈怎麼唱？",
-            choices: [
-                { text: "🗣️ 大家一起大喊：「加油！衝啊！」", score: 1.5, tag: "rhythmic chanting vocals, shouting, crowd chants", sound: "music" },
-                { text: "👵 溫柔的阿姨唱英文抒情慢歌", score: 0.5, tag: "slow gentle adult pop singing", sound: "Strings" },
-                { text: "🎻 不需要人聲，純樂器演奏", score: 1.0, tag: "pure instrumental, orchestral only", sound: "Piano" }
-            ]
-        },
-        {
-            systemText: "【第十二關：謝幕儀式 (結尾)】接力賽圓滿結束！音樂最後要怎麼謝幕？",
-            choices: [
-                { text: "🥁 大鼓『咚！』的一聲，震撼有力地結束", score: 1.5, tag: "sharp sudden final drum hit ending", sound: "fire" },
-                { text: "🚂 慢慢變小聲，像坐火車離去 (淡出)", score: 1.0, tag: "fading out slowly to silence", sound: "Slow tempo" },
-                { text: "🔌 突然斷掉，像停電一樣", score: 0.4, tag: "sudden cut-off abrupt ending", sound: "ice" }
-            ]
-        }
-    ],
-    "下雨的窗邊": [
-        {
-            systemText: "【第一關：音樂心跳 (速度)】靠在窗邊看雨滴慢慢滑落。這時的心情節奏是？",
-            choices: [
-                { text: "🐢 慢吞吞的、很放鬆 (慢板)", score: 1.5, tag: "slow cozy tempo, relaxing, 65 bpm", sound: "Slow tempo" },
-                { text: "🏃 像在操場跑步一樣快 (快板)", score: 0.5, tag: "fast running tempo, allegro", sound: "Fast tempo" },
-                { text: "🔥 急急忙忙的、非常緊張", score: 0.3, tag: "agitated tense high-speed tempo", sound: "fire" }
-            ]
-        },
-        {
-            systemText: "【第二關：身體步伐 (拍號)】小雨點滴滴答答地落下，輕輕搖擺，哪種拍子最舒服？",
-            choices: [
-                { text: "🚶 穩穩的、很安心的 4/4 四拍子", score: 1.5, tag: "steady gentle 4/4 meter, calm flow", sound: "music" },
-                { text: "🏃 像跳接力賽一樣的 2/4 二拍子", score: 0.8, tag: "marching upbeat 2/4 meter", sound: "music" },
-                { text: "🚨 聽不出拍子，像警報器一樣", score: 0.3, tag: "abstract beat-less soundscape", sound: "ice" }
-            ]
-        },
-        {
-            systemText: "【第三關：雨點敲擊 (節奏型)】雨滴打在玻璃窗上發出清脆的聲音。節奏應該是？",
-            choices: [
-                { text: "💦 輕輕的、斷斷續續的『跳音節奏』", score: 1.5, tag: "delicate pitter-patter staccato notes, raindrops rhythm", sound: "Moderate tempo" },
-                { text: "⛈️ 像打雷一樣，每一下都很重", score: 0.5, tag: "heavy booming thunder-like drumming", sound: "fire" },
-                { text: "📢 像警車警報器一樣長長的拉音", score: 0.3, tag: "long continuous synthesizer sirens", sound: "ice" }
-            ]
-        },
-        {
-            systemText: "【第四關：音樂顏色 (調性)】在溫暖的屋子裡看雨，音樂的顏色該選？",
-            choices: [
-                { text: "🌑 帶點淡淡思念、溫柔的藍色小調", score: 1.5, tag: "mellow nostalgic minor tonality, melancholic", sound: "Minor Key" },
-                { text: "☀️ 明亮耀眼、興高采烈的黃色大調", score: 0.8, tag: "bright joyful Major Key", sound: "Major Key" },
-                { text: "🎃 嚇人的萬聖節恐怖調子", score: 0.4, tag: "spooky dark scary Halloween scale", sound: "Minor Key" }
-            ]
-        },
-        {
-            systemText: "【第五關：溫暖熱可可 (和聲)】房間裡喝著熱可可，背景音樂的和弦聽起來要？",
-            choices: [
-                { text: "☕ 溫和放鬆，像咖啡館一樣舒服 (協和音)", score: 1.5, tag: "warm mellow chord progression, lo-fi chords", sound: "Piano" },
-                { text: "🕸️ 像恐怖片一樣，聽了全身起雞皮疙瘩", score: 0.5, tag: "unsettling creepy dissonant chords", sound: "ice" },
-                { text: "🥁 像在敲打鐵桶一樣的聲音", score: 0.2, tag: "unharmonious noisy clanging", sound: "fire" }
-            ]
-        },
-        {
-            systemText: "【第六關：雨天高度 (音區)】窗外有雨點的高音，屋內有溫暖的伴奏。聲音高度要？",
-            choices: [
-                { text: "🔔 亮晶晶高音配溫暖中音 (高低分明)", score: 1.5, tag: "light bell-like high notes, warm piano backing", sound: "music" },
-                { text: "🐘 全部擠在最沉重的低音區 (像地震)", score: 0.3, tag: "muddy low-end rumble", sound: "fire" },
-                { text: "📢 只有一個尖叫的高音", score: 0.2, tag: "flat single shrill high pitch", sound: "ice" }
-            ]
-        },
-        {
-            systemText: "【第七關：沙沙法器 (主奏)】安靜溫馨的房間裡，哪種法器樂器最合適彈出旋律？",
-            choices: [
-                { text: "🎹 聲音軟綿綿、暖洋洋的鋼琴 (Felt Piano)", score: 1.5, tag: "soft warm felt piano melody", sound: "Piano" },
-                { text: "🎺 很大聲、亮晃晃的小號", score: 0.5, tag: "loud piercing trumpet solos", sound: "Brass" },
-                { text: "🎸 搖滾電吉他", score: 0.3, tag: "distorted heavy electric guitar solos", sound: "fire" }
-            ]
-        },
-        {
-            systemText: "【第八關：雨天音效 (特效)】為了讓聽歌的人身歷其境，背景加入什麼聲音？",
-            choices: [
-                { text: "🌧️ 窗外沙沙雨聲與黑膠溫暖的雜音", score: 1.5, tag: "soft rain falling sound effect, cozy vinyl crackle", sound: "music" },
-                { text: "🥬 菜市場賣菜的叫賣聲", score: 0.2, tag: "noisy market crowd background noises", sound: "music" },
-                { text: "🏎️ 跑車在馬路上狂飆的引擎聲", score: 0.3, tag: "loud speeding race car engine sfx", sound: "fire" }
-            ]
-        },
-        {
-            systemText: "【第九關：安靜房間 (織體)】屋內很安靜，背景音樂的樂器排隊隊伍應該？",
-            choices: [
-                { text: "🍃 只有鋼琴和簡單的背景墊樂 (乾淨簡單)", score: 1.5, tag: "minimalist clean instrument layers, simple lofi", sound: "Strings" },
-                { text: "🏰 一百種樂器大合奏 (厚重交響)", score: 0.5, tag: "full heavy symphony orchestra", sound: "Brass" },
-                { text: "🤫 完全沒有伴奏，死寂一片", score: 0.3, tag: "absolute silence", sound: "Slow tempo" }
-            ]
-        },
-        {
-            systemText: "【第十關：悄悄音量 (力度)】雨天場景非常安靜，背景音樂的音量要控制在？",
-            choices: [
-                { text: "🤫 像講悄悄話一樣溫柔小聲 (中弱/弱)", score: 1.5, tag: "quiet whispers volume, peaceful, soft dynamics", sound: "Slow tempo" },
-                { text: "📢 用大喇叭大喊一樣大聲", score: 0.3, tag: "extremely loud volume, shouting level", sound: "fire" },
-                { text: "🌀 音量突然變大又突然變小", score: 0.5, tag: "unstable fluctuating sound waves", sound: "ice" }
-            ]
-        },
-        {
-            systemText: "【第十一關：窗邊歌聲 (人聲)】你正在看一本故事書，這時的歌聲精靈應該？",
-            choices: [
-                { text: "🤫 不需要唱出歌詞，輕輕哼唱 (哼鳴) 或純器樂", score: 1.5, tag: "wordless vocal hums, or instrumental chill, no lyrics", sound: "Piano" },
-                { text: "🎤 大聲唱出英文 Rap (饒舌)", score: 0.3, tag: "energetic rapid aggressive male rap lyrics", sound: "fire" },
-                { text: "👑 大家一起用美聲唱史詩合唱", score: 0.5, tag: "grand formal opera choir vocals", sound: "Strings" }
-            ]
-        },
-        {
-            systemText: "【第十二關：天晴彩虹 (結尾)】雨漸漸停了，天邊現出彩虹，這首曲子最後怎麼謝幕？",
-            choices: [
-                { text: "🚂 聲音越來越小，像霧一樣消失 (淡出)", score: 1.5, tag: "gentle slow fade out to silence", sound: "Slow tempo" },
-                { text: "🚪 「碰！」的一聲，像關門一樣突然停掉", score: 0.5, tag: "sudden door slam hard stop ending", sound: "fire" },
-                { text: "📢 聲音突然變得超級大聲，嚇人一跳", score: 0.2, tag: "unexpected final loud blast explosion", sound: "ice" }
-            ]
-        }
-    ],
-    "快樂動物園": [
-        {
-            systemText: "【第一關：音樂心跳 (速度)】小猴子和袋鼠跳來跳去！這段動物園配樂的速度是？",
-            choices: [
-                { text: "🌴 樹懶散步 (很慢很慢，慢板)", score: 0.5, tag: "slow sloth pace tempo", sound: "Slow tempo" },
-                { text: "🐇 兔子蹦蹦跳 (非常輕快，急板)", score: 1.5, tag: "fast upbeat tempo, bouncy cute pace, 125 bpm", sound: "Fast tempo" },
-                { text: "🐘 大象慢走 (中等速度，行板)", score: 1.0, tag: "moderate steady walking elephant tempo", sound: "Moderate tempo" }
-            ]
-        },
-        {
-            systemText: "【第二關：身體步伐 (拍號)】小動物跟著音樂一搖一擺，哪種拍子最像袋鼠跳躍？",
-            choices: [
-                { text: "🦘 咚噠噠、二噠噠 (搖擺的 6/8 拍)", score: 1.5, tag: "bouncy 6/8 swing meter, cute waltz", sound: "music" },
-                { text: "🥁 咚噠、咚噠 (進行曲的 2/4 拍)", score: 0.8, tag: "marching 2/4 beat, straight", sound: "music" },
-                { text: "🌀 沒有拍子，像風聲一樣", score: 0.3, tag: "ambient beatless wind sounds", sound: "ice" }
-            ]
-        },
-        {
-            systemText: "【第三關：活潑個性 (節奏型)】為了模擬小動物活潑好動，背景節奏該怎麼設計？",
-            choices: [
-                { text: "⚡ 不斷跳躍、帶有切分音的節奏", score: 1.5, tag: "playful syncopated bouncy rhythm, jumpy", sound: "Moderate tempo" },
-                { text: "☁️ 拖得很長、很慢的長音節奏", score: 0.5, tag: "long slow sustained background tones", sound: "Slow tempo" },
-                { text: "💥 突然重擊、沒有任何規律", score: 0.3, tag: "irregular sudden crashing noise", sound: "fire" }
-            ]
-        }
-    ],
-    "遊樂園探險": [],
-    "魔法森林": [],
-    "宇宙探險": [],
-    "甜甜夢鄉": [],
-    "海底世界": [],
-    "闖關遊戲": [],
-    "生日派對": []
-};
-
-// 為了壓縮空間，runtime 動態產生其餘主題題庫
-function generateAllSpecializedBanks() {
-    // 快樂動物園補全 4-12 題
-    specializedQuestionBanks["快樂動物園"].splice(3, 9, 
-        {
-            systemText: "【第四關：音樂顏色 (調性)】小動物在陽光下開心地吃水果，這時音樂的顏色是？",
-            choices: [
-                { text: "☀️ 陽光大調 (開心又明亮)", score: 1.5, tag: "bright happy Major Key, sunny", sound: "Major Key" },
-                { text: "🌑 灰暗小調 (像晚上停電一樣害怕)", score: 0.5, tag: "dark mysterious minor key", sound: "Minor Key" },
-                { text: "🏮 森林神秘音階", score: 0.8, tag: "mystic oriental style", sound: "Pentatonic" }
-            ]
-        },
-        {
-            systemText: "【第五關：動物握手 (和聲)】長頸鹿和小松鼠高興地握手，背景和聲要用什麼氣氛？",
-            choices: [
-                { text: "🤝 聽起來很和諧舒適的『協和音』", score: 1.5, tag: "sweet consonant playful harmony", sound: "Piano" },
-                { text: "🐯 吵架打架的刺耳聲音 (不協和音)", score: 0.5, tag: "harsh discordant clash sounds", sound: "fire" },
-                { text: "🚨 像警報器一樣的奇怪聲波", score: 0.2, tag: "scary electronic alarm noise", sound: "ice" }
-            ]
-        },
-        {
-            systemText: "【第六關：天空與陸地 (音區)】小鳥唱歌，大象散步，這時候旋律的高度應該？",
-            choices: [
-                { text: "🐦 又高又清脆的高音區 (像小鳥叫)", score: 1.5, tag: "bright high-pitched bird-like melodies", sound: "ice" },
-                { text: "🐘 沉重低沉的低音區 (像大象走路)", score: 0.8, tag: "heavy low bass register rumble", sound: "fire" },
-                { text: "🚶 中間音區，平平淡淡的", score: 0.6, tag: "mellow middle register", sound: "music" }
-            ]
-        },
-        {
-            systemText: "【第七關：森林歌唱家 (主奏)】要模仿小鳥小松鼠唱歌，哪種吹奏法器最合適？",
-            choices: [
-                { text: "🌬️ 清脆嘹亮的木管樂器 (長笛/雙簧管)", score: 1.5, tag: "woodwind lead, flying flute solos", sound: "Woodwinds" },
-                { text: "🎺 很大聲很吵的小號 (銅管)", score: 0.6, tag: "bright loud brass fanfare", sound: "Brass" },
-                { text: "🎻 沉重大提琴 (弦樂器)", score: 0.8, tag: "warm solo cello line", sound: "Strings" }
-            ]
-        },
-        {
-            systemText: "【第八關：森林環境 (特效)】聽！動物園裡有大自然的伴奏，加入什麼背景音？",
-            choices: [
-                { text: "🐦 森林裡的鳥叫聲與小動物嬉戲沙沙聲", score: 1.5, tag: "animals soundscape, chirping birds, forest background", sound: "music" },
-                { text: "🏎️ 跑車甩尾的引擎聲", score: 0.2, tag: "racing car drift tire squeals", sound: "fire" },
-                { text: "⛈️ 暴風雨夾雜雷擊聲", score: 0.5, tag: "stormy rain howling wind and thunder sfx", sound: "ice" }
-            ]
-        },
-        {
-            systemText: "【第九關：森林派對 (織體)】所有動物一起跳舞，這時的樂器隊伍應該？",
-            choices: [
-                { text: "🦁 許多木管和敲擊樂器一起合奏 (豐富)", score: 1.5, tag: "playful layered acoustic instrumentation, rich ensemble", sound: "Strings" },
-                { text: "🚶 只有一隻直笛在吹單音 (孤單單)", score: 0.5, tag: "single simple solo recorder melody", sound: "Woodwinds" },
-                { text: "👏 只有一個人在拍手", score: 0.2, tag: "bare hand clapping only", sound: "music" }
-            ]
-        },
-        {
-            systemText: "【第十關：獅子出沒 (力度)】小獅子突然跑出來打招呼，然後輕輕走開，力度如何變化？",
-            choices: [
-                { text: "🦁 突然大聲然後慢慢變溫柔 (強 ➡️ 弱)", score: 1.5, tag: "dynamic contrasts, playful crescendos, sudden loud to soft", sound: "fire" },
-                { text: "📢 一直像大喇叭一樣超級大聲", score: 0.5, tag: "unyielding loud fortissimo, heavy volume", sound: "fire" },
-                { text: "🤫 像蚊子叫一樣完全聽不見", score: 0.3, tag: "extremely quiet whisper soft volume", sound: "Slow tempo" }
-            ]
-        },
-        {
-            systemText: "【第十一關：動物大合唱 (人聲)】要讓這首歌曲充滿童趣，歌聲精靈應該？",
-            choices: [
-                { text: "🧒 輕快開心的童聲合唱，或者純樂器", score: 1.5, tag: "playful childrens chorus backing", sound: "music" },
-                { text: "👩 恐怖片女高音美聲高歌", score: 0.5, tag: "dramatic operatic female soprano solos", sound: "Strings" },
-                { text: "🎸 大吼大叫的搖滾主唱", score: 0.3, tag: "harsh metal rock vocals screaming", sound: "fire" }
-            ]
-        },
-        {
-            systemText: "【第十二關：天黑謝幕 (結尾)】天黑了，小動物們揮手再見，音樂最後怎麼謝幕？",
-            choices: [
-                { text: "🪵 伴隨清脆木琴一聲「咚！」，活潑俐落結束", score: 1.5, tag: "playful staccato final note, xylophone pop", sound: "music" },
-                { text: "🚂 慢慢變小聲到聽不見 (淡出)", score: 1.2, tag: "fading out slowly to quiet forest silence", sound: "Slow tempo" },
-                { text: "🔌 突然斷掉，像停電一樣", score: 0.4, tag: "abrupt silent cut ending", sound: "ice" }
-            ]
-        }
-    );
-
-    // 遊樂園探險
-    specializedQuestionBanks["遊樂園探險"] = [
-        {
-            systemText: "【第一關：音樂心跳 (速度)】旋轉木馬轉動！摩天輪上升，速度應該是？",
-            choices: [
-                { text: "🎡 中等速度，帶著輕快擺動 (行板/小快板)", score: 1.5, tag: "cheerful moderate allegretto tempo, 110 bpm", sound: "Moderate tempo" },
-                { text: "🚀 像超音速火箭一樣瘋狂急促 (急板)", score: 1.0, tag: "frantic roller-coaster fast tempo, presto", sound: "Fast tempo" },
-                { text: "💤 慢到像在做夢睡覺一樣 (慢板)", score: 0.5, tag: "dreamy sleepy slow tempo, adagio", sound: "Slow tempo" }
-            ]
-        },
-        {
-            systemText: "【第二關：轉圈律動 (拍號)】旋轉木馬一上一下、旋轉，最適合哪種三拍子？",
-            choices: [
-                { text: "💃 咚噠噠、二噠噠 (跳舞的三拍子華爾茲)", score: 1.5, tag: "waltz meter, swaying 3/4 beat", sound: "music" },
-                { text: "🥁 咚噠、咚噠 (踏步的二拍子進行曲)", score: 0.8, tag: "marching 2/4 beat, straight", sound: "music" },
-                { text: "🌀 拍子軟綿綿，沒有規律", score: 0.3, tag: "abstract drifting time signature", sound: "ice" }
-            ]
-        },
-        {
-            systemText: "【第三關：飛車俯衝 (節奏型)】配合雲霄飛車上一會兒下一會兒的離心力，節奏要？",
-            choices: [
-                { text: "🎢 忽快忽慢、充滿彈性與起伏的節奏", score: 1.5, tag: "rhythmic rubato, shifting accents, rollercoaster momentum", sound: "Moderate tempo" },
-                { text: "🤖 像機械人一樣完全不變、死板的節奏", score: 0.5, tag: "monotonous rigid mechanical clock tick beat", sound: "Slow tempo" },
-                { text: "☁️ 一直拉長音，一動不動", score: 0.3, tag: "long frozen static tones", sound: "Slow tempo" }
-            ]
-        },
-        {
-            systemText: "【第四關：樂園煙花 (調性)】看到滿天的氣球和煙花，這時音樂的顏色應該是？",
-            choices: [
-                { text: "☀️ 繽紛燦爛大調 (像棉花糖一樣甜)", score: 1.5, tag: "bright colorful Major Key, festive and joyful", sound: "Major Key" },
-                { text: "🌑 暗黑恐怖、鬼屋一樣的小調", score: 0.5, tag: "dark spooky haunted house style minor key", sound: "Minor Key" },
-                { text: "🏮 古代傳奇武俠色彩", score: 0.7, tag: "traditional folk style", sound: "Pentatonic" }
-            ]
-        },
-        {
-            systemText: "【第五關：浪漫城堡 (和聲)】我們在城堡前拍照，這時背景的和弦聽起來？",
-            choices: [
-                { text: "🏰 甜美協和、充滿節慶歡樂感的和弦", score: 1.5, tag: "sweet festival consonant harmony, pleasant", sound: "Piano" },
-                { text: "🕸️ 刺耳撞擊、像玻璃碎掉的和聲", score: 0.5, tag: "harsh clash dissonant tone", sound: "fire" },
-                { text: "🚶 沒有任何和聲，平淡無奇", score: 0.3, tag: "unaccompanied single sound line", sound: "music" }
-            ]
-        },
-        {
-            systemText: "【第六關：音樂盒 (音區)】遊樂園有叮叮咚咚音樂盒，也有大鐘聲，音區要？",
-            choices: [
-                { text: "🔔 清脆高音配溫暖中音 (亮晶晶)", score: 1.5, tag: "sparkling high-register bells, warm midground", sound: "ice" },
-                { text: "🦖 只有低沉沉的低音 (像大怪獸)", score: 0.4, tag: "oppressive muddy deep bass notes", sound: "fire" },
-                { text: "🤫 全部擠在中音區，像在說悄悄話", score: 0.6, tag: "flat plain middle register tones", sound: "music" }
-            ]
-        },
-        {
-            systemText: "【第七關：童話法器 (主奏)】要表現遊樂園閃閃發光、像童話一樣，哪種樂器最適合？",
-            choices: [
-                { text: "🎹 鋼片琴、鐘琴與風琴 (叮叮咚咚亮晶晶)", score: 1.5, tag: "celesta lead, toy piano, music box style bells, pipe organ", sound: "Piano" },
-                { text: "🎻 粗獷咆哮的低音提琴", score: 0.4, tag: "heavy harsh double bass", sound: "Strings" },
-                { text: "🪵 沉悶的木魚和竹板", score: 0.3, tag: "clunky wooden block temple blocks", sound: "music" }
-            ]
-        },
-        {
-            systemText: "【第八關：樂園聲浪 (特效)】這可是最熱鬧的遊樂園！背景加入什麼歡樂聲音？",
-            choices: [
-                { text: "🎢 遠處飛車尖叫、爆米花機和拉炮聲", score: 1.5, tag: "fairground soundscape, faint laughter, festive murmurs, fireworks popping", sound: "music" },
-                { text: "🦉 寂靜無聲的黑夜森林風聲", score: 0.4, tag: "spooky quiet forest howling wind at night", sound: "Woodwinds" },
-                { text: "⌨️ 辦公室打字機的敲鍵盤聲", score: 0.2, tag: "monotonous office typing sfx", sound: "music" }
-            ]
-        },
-        {
-            systemText: "【第九關：花車巡遊 (織體)】花車巡遊開始！所有玩具動起來，樂器隊伍應該？",
-            choices: [
-                { text: "🎪 各種敲擊、管樂器層層疊疊合奏 (熱鬧)", score: 1.5, tag: "layered circus orchestration, rich festive texture, carnival tutti", sound: "Brass" },
-                { text: "🚶 只有一隻木笛單獨在吹單音 (孤單)", score: 0.5, tag: "solitary single wood flute line", sound: "Woodwinds" },
-                { text: "👏 只有一下孤單的鼓聲", score: 0.2, tag: "single isolated bass drum hit", sound: "music" }
-            ]
-        },
-        {
-            systemText: "【第十關：巡遊逼近 (力度)】巡遊隊伍從遠處走來，在眼前經過，音量要？",
-            choices: [
-                { text: "📢 從很小聲慢慢變到超級大聲 (漸強)", score: 1.5, tag: "gradual crescendo, swelling dynamic volume", sound: "fire" },
-                { text: "🥁 一直保持像打雷一樣超级大聲", score: 0.5, tag: "constant heavy loud fortissimo level", sound: "fire" },
-                { text: "🤫 突然變得完全沒有聲音", score: 0.3, tag: "sudden quiet drop off", sound: "Slow tempo" }
-            ]
-        },
-        {
-            systemText: "【第十一關：歡樂歌聲 (人聲)】花車上的卡通主角向你招手，這時歌聲精靈應該？",
-            choices: [
-                { text: "🎶 歡樂無歌詞「啦啦啦」哼唱或大合奏", score: 1.5, tag: "cheerful joyful vocal 'la-la-la' chants, choir", sound: "music" },
-                { text: "👩 嚴肅的歌劇美聲獨唱", score: 0.6, tag: "stately slow opera soprano aria lyrics", sound: "Strings" },
-                { text: "😢 悲傷大哭的哭泣聲", score: 0.3, tag: "crying sobbing vocals", sound: "Piano" }
-            ]
-        },
-        {
-            systemText: "【第十二關：大煙花綻放 (結尾)】大煙花綻放！完美的一天結束，音樂最後怎麼謝幕？",
-            choices: [
-                { text: "🔔 伴隨「砰！砰！」大鐘聲，在最高潮熱烈結束", score: 1.5, tag: "grand explosive festive climax ending with bell chimes", sound: "fire" },
-                { text: "🔌 音樂突然斷掉，像停電一樣", score: 0.4, tag: "abrupt sudden dead stop ending", sound: "ice" },
-                { text: "🚂 慢慢變小聲到完全聽不見", score: 1.2, tag: "fading out slowly to silent evening", sound: "Slow tempo" }
-            ]
-        }
-    ];
-
-    // 魔法森林
-    specializedQuestionBanks["魔法森林"] = [
-        {
-            systemText: "【第一關：音樂心跳 (速度)】森林薄霧瀰漫，樹葉輕輕搖曳，步伐有多快？",
-            choices: [
-                { text: "🍃 慢條斯理、輕飄飄的 (慢板/行板)", score: 1.5, tag: "slow mysterious tempo, gentle pacing, 72 bpm", sound: "Slow tempo" },
-                { text: "🚀 火箭發射一樣狂奔 (急板)", score: 0.4, tag: "insane ultra fast speed presto", sound: "Fast tempo" },
-                { text: "🏃 像接力賽一樣快 (快板)", score: 0.8, tag: "brisk racing tempo allegro", sound: "Fast tempo" }
-            ]
-        },
-        {
-            systemText: "【第二關：小水滴 (拍號)】森林小水滴滴答落下，精靈踏著輕盈舞步，哪種拍子最舒服？",
-            choices: [
-                { text: "🚶 溫和、沒有壓迫感的 4/4 四拍子", score: 1.5, tag: "gentle 4/4 timing, flowing liquid meter", sound: "music" },
-                { text: "🥁 雄壯像士兵走路的 2/4 二拍子", score: 0.5, tag: "stiff marching 2/4 beat", sound: "music" },
-                { text: "🌪️ 混亂狂暴的拍子", score: 0.2, tag: "unstable chaotic uneven time", sound: "ice" }
-            ]
-        },
-        {
-            systemText: "【第三關：沙沙樹葉 (節奏型)】呈現神祕精靈魔法，節奏該如何設計？",
-            choices: [
-                { text: "🍃 輕柔、緩慢、長音不斷的流動節奏", score: 1.5, tag: "ethereal floating long-notes rhythm, soothing flow", sound: "Slow tempo" },
-                { text: "⛈️ 像打雷一樣，重重鼓點的節奏", score: 0.4, tag: "aggressive pounding battle drums beat", sound: "fire" },
-                { text: "💥 完全沒有節奏，一聲巨響", score: 0.3, tag: "random loud blast sound sfx", sound: "fire" }
-            ]
-        },
-        {
-            systemText: "【第四關：魔法起舞 (調性)】灑下金色陽光，精靈跳起古舞，調性該選？",
-            choices: [
-                { text: "🏮 東方五聲音階 (像走進仙境)", score: 1.5, tag: "ancient mystical Pentatonic Scale, oriental wonderland", sound: "Pentatonic" },
-                { text: "☀️ 明亮燦爛的現代大調", score: 1.0, tag: "bright modern major key chords", sound: "Major Key" },
-                { text: "🎃 恐怖怪誕的萬聖節小調", score: 0.5, tag: "scary gothic minor scale", sound: "Minor Key" }
-            ]
-        },
-        {
-            systemText: "【第五關：奇幻綻放 (和聲)】魔法花朵綻放，背景和弦帶給聽眾什麼感覺？",
-            choices: [
-                { text: "☁️ 夢幻空靈、像在雲朵上飄浮 (協和音)", score: 1.5, tag: "dreamy atmospheric consonant harmony, soft chords", sound: "Piano" },
-                { text: "🕸️ 刺耳、吵架、像怪物抓玻璃 (不協和音)", score: 0.4, tag: "tense bone-chilling dissonant harmony", sound: "ice" },
-                { text: "🚂 沉悶單調，像火車開動", score: 0.3, tag: "dull industrial train chug noise", sound: "fire" }
-            ]
-        },
-        {
-            systemText: "【第六關：螢火蟲 (音區)】小螢火蟲飛舞，巨樹呼吸，聲音高度怎麼安排？",
-            choices: [
-                { text: "✨ 亮晶晶的極高音配溫暖中音 (空間寬廣)", score: 1.5, tag: "high-pitched shimmering bell notes, wide soundstage", sound: "ice" },
-                { text: "🦖 全部擠在最沉重的低音區 (像地震)", score: 0.4, tag: "gloomy low bass register drone", sound: "fire" },
-                { text: "🚶 只有單一的高音尖叫", score: 0.2, tag: "flat piercing whistle tone", sound: "ice" }
-            ]
-        }
-    ];
-
-    // 動態複製其餘 8 個主題至基礎庫中
-    const fallbackBase = specializedQuestionBanks["下雨的窗邊"];
-    const themesToBackfill = ["魔法森林", "宇宙探險", "甜甜夢鄉", "海底世界", "闖關遊戲", "生日派對"];
+function getThemeQuestions(title) {
+    const defaultFast = (title === "熱血運動會" || title === "闖關遊戲" || title === "快樂動物園");
+    const defaultPlayful = (title === "遊樂園探險" || title === "生日派對");
     
-    themesToBackfill.forEach(theme => {
-        if (!specializedQuestionBanks[theme] || specializedQuestionBanks[theme].length < 12) {
-            specializedQuestionBanks[theme] = JSON.parse(JSON.stringify(fallbackBase));
+    return [
+        {
+            systemText: `【第一關：音樂心跳 (速度)】閉上眼睛想像『${title}』的畫面，這首配樂的心跳節奏應該有多快？`,
+            choices: [
+                { text: "🐢 散步放鬆 (慢慢的，慢板)", score: defaultFast ? 0.5 : 1.5, tag: "slow relaxing tempo", sound: "Slow tempo" },
+                { text: "🚶 熱身漫步 (中等速度，行板)", score: defaultPlayful ? 1.5 : 1.0, tag: "moderate steady tempo, 90 bpm", sound: "Moderate tempo" },
+                { text: "🏃 活力奔馳 (非常輕快，急板)", score: defaultFast ? 1.5 : 0.6, tag: "upbeat fast tempo, energetic, 130 bpm", sound: "Fast tempo" }
+            ]
+        },
+        {
+            systemText: `【第二關：身體步伐 (拍號)】配合『${title}』的場景律動，哪種拍子最能帶起身體的擺動？`,
+            choices: [
+                { text: "🥁 咚噠、咚噠 (一二、一二，兩拍子進行曲)", score: defaultFast ? 1.5 : 0.8, tag: "steady 2/4 marching beat", sound: "music" },
+                { text: "💃 咚噠噠、二噠噠 (輕快轉圈的三拍子)", score: defaultPlayful ? 1.5 : 0.8, tag: "swaying 3/4 waltz rhythm", sound: "music" },
+                { text: "🚶 穩穩當當、最安心的 4/4 四拍子", score: (!defaultFast && !defaultPlayful) ? 1.5 : 1.0, tag: "gentle balanced 4/4 meter", sound: "music" }
+            ]
+        },
+        {
+            systemText: `【第三關：前進動力 (節奏型)】為了襯托『${title}』的畫面，背景的節奏應該怎麼彈奏？`,
+            choices: [
+                { text: "⚡ 連續跳躍、充滿前進動力的跳音節奏", score: defaultFast ? 1.5 : 0.8, tag: "bouncy syncopated staccato rhythm", sound: "Fast tempo" },
+                { text: "🍃 輕柔緩慢、像微風拂過的長音節奏", score: (!defaultFast) ? 1.5 : 0.6, tag: "smooth continuous sustained notes", sound: "Slow tempo" },
+                { text: "🤖 像機械人一樣規則敲打的節奏", score: 0.5, tag: "steady mechanical pulse", sound: "Moderate tempo" }
+            ]
+        },
+        {
+            systemText: `【第四關：音樂顏色 (調性)】要表現出『${title}』的情感色彩，音樂應該使用什麼光影顏色？`,
+            choices: [
+                { text: "☀️ 陽光大調 (聽起來開心、溫暖又明亮)", score: (title !== "下雨的窗邊" && title !== "宇宙探險") ? 1.5 : 0.8, tag: "bright joyful Major Key", sound: "Major Key" },
+                { text: "🌑 神祕小調 (帶點思念、冒險或憂傷)", score: (title === "下雨的窗邊" || title === "宇宙探險" || title === "闖關遊戲") ? 1.5 : 0.6, tag: "mysterious minor key tonality", sound: "Minor Key" },
+                { text: "🏮 東方五聲音階 (像走進神奇仙境)", score: (title === "魔法森林" || title === "海底世界") ? 1.5 : 0.9, tag: "dreamy oriental Pentatonic Scale", sound: "Pentatonic" }
+            ]
+        },
+        {
+            systemText: `【第五關：氣氛營造 (和聲)】當故事出現特別情節時，背景和弦要呈現什麼感覺？`,
+            choices: [
+                { text: "☕ 聽起來很舒服、很放鬆的『協和音』", score: 1.5, tag: "warm sweet consonant harmony", sound: "Piano" },
+                { text: "🔥 有點撞擊、刺激懸疑的『不協和音』", score: defaultFast ? 1.2 : 0.6, tag: "dramatic tense chord progression", sound: "fire" },
+                { text: "💤 輕柔平靜、讓人安心的和聲", score: 1.0, tag: "soothing peaceful ambiance chords", sound: "Piano" }
+            ]
+        },
+        {
+            systemText: `【第六關：天空與大地 (音區)】主角在場景中登場時，旋律主要在什麼高度響起？`,
+            choices: [
+                { text: "🔔 清脆明亮的高音區 (像精靈與小鳥)", score: 1.5, tag: "sparkling high-register melodies", sound: "ice" },
+                { text: "🦁 沉重深沉的低音區 (像巨獸與引力)", score: 0.8, tag: "deep resonant low-bass tones", sound: "fire" },
+                { text: "🚶 平和穩重的中音區 (像溫柔說話)", score: 1.0, tag: "warm lyrical midrange", sound: "music" }
+            ]
+        },
+        {
+            systemText: `【第七關：靈魂法器 (主奏)】要為『${title}』選出主角音色，哪一種法器最能代表它？`,
+            choices: [
+                { text: "🎺 精神奕奕的銅管樂器 (小號、法國號)", score: defaultFast ? 1.5 : 0.7, tag: "heroic bright brass fanfare", sound: "Brass" },
+                { text: "🎹 溫柔優雅的鍵盤法器 (鋼琴、音樂盒)", score: (!defaultFast) ? 1.5 : 0.8, tag: "intimate warm piano and celesta", sound: "Piano" },
+                { text: "🌬️ 空靈清脆的木管樂器 (長笛、豎笛)", score: 1.2, tag: "airy woodwinds and enchanting flute", sound: "Woodwinds" },
+                { text: "🎻 悠揚深情的弦樂家族 (提琴組)", score: 1.2, tag: "rich soaring strings section", sound: "Strings" }
+            ]
+        },
+        {
+            systemText: `【第八關：身歷其境 (特效)】為了讓聽眾彷彿身臨其境，背景要加入哪種環境魔法聲響？`,
+            choices: [
+                { text: "🍃 大自然微風、鳥鳴或溫暖雨滴聲", score: 1.5, tag: "natural soundscape, birds, rain or wind", sound: "music" },
+                { text: "🗣️ 現場開心的歡呼、拍手或笑聲", score: defaultPlayful || defaultFast ? 1.5 : 0.8, tag: "cheerful crowd murmurs, laughter and claps", sound: "music" },
+                { text: "📡 神奇的魔法閃光或電子嗶嗶聲", score: 1.2, tag: "magical shimmering bells and sci-fi glimmers", sound: "ice" }
+            ]
+        },
+        {
+            systemText: `【第九關：樂器隊伍 (織體)】這場音樂冒險中，參與演奏的樂器隊伍應該有多大？`,
+            choices: [
+                { text: "🏰 整個管弦樂隊齊奏的大合奏 (豐富宏大)", score: defaultFast ? 1.5 : 0.9, tag: "full grand orchestral tutti texture", sound: "Brass" },
+                { text: "🍃 只有兩三樣樂器輕聲細語 (乾淨清澈)", score: (!defaultFast) ? 1.5 : 0.8, tag: "sparse minimalist delicate chamber layers", sound: "Strings" },
+                { text: "🚶 單一樂器獨奏 (專注純樸)", score: 1.0, tag: "intimate solo instrument performance", sound: "Woodwinds" }
+            ]
+        },
+        {
+            systemText: `【第十關：音量呼吸 (力度)】配樂在高潮情節時，音樂的音量要怎麼變化？`,
+            choices: [
+                { text: "📢 突然爆發、非常有力的強音 (突強！)", score: defaultFast ? 1.5 : 0.7, tag: "sudden explosive sforzando dynamics", sound: "fire" },
+                { text: "🌊 從小聲慢慢變得非常宏亮 (漸強)", score: 1.5, tag: "gradual swelling crescendo", sound: "fire" },
+                { text: "🤫 一直保持溫柔細膩的小聲 (弱音)", score: (!defaultFast) ? 1.5 : 0.8, tag: "whisper soft gentle dynamics", sound: "Slow tempo" }
+            ]
+        },
+        {
+            systemText: `【第十一關：歌聲精靈 (人聲)】你希望這段配樂如何向聽眾傳遞情感？`,
+            choices: [
+                { text: "🎻 純樂器演奏 (無歌詞干擾，自由想像)", score: 1.5, tag: "pure instrumental soundtrack, no vocals", sound: "Piano" },
+                { text: "✨ 精靈般的無歌詞輕輕哼唱 (哼鳴)", score: 1.4, tag: "ethereal wordless vocalise hums", sound: "Strings" },
+                { text: "🗣️ 齊聲大喊或熱鬧的童聲合唱", score: defaultFast || defaultPlayful ? 1.5 : 0.8, tag: "joyful choral chants and singing", sound: "music" }
+            ]
+        },
+        {
+            systemText: `【第十二關：圓滿落幕 (結尾)】冒險即將結束，這首專屬配樂要如何謝幕？`,
+            choices: [
+                { text: "🥁 伴隨定音鼓震撼俐落地結束！", score: defaultFast ? 1.5 : 0.9, tag: "grand definitive final cadence strike", sound: "fire" },
+                { text: "🚂 像火車開遠一樣，慢慢消失在空氣中 (淡出)", score: (!defaultFast) ? 1.5 : 1.0, tag: "peaceful slow fade-out to silence", sound: "Slow tempo" },
+                { text: "✨ 停留在一個晶瑩剔透的和弦餘音上", score: 1.4, tag: "lingering sparkling final sustained chord", sound: "ice" }
+            ]
         }
-    });
-
-    // 🌟 宇宙探險
-    const space = specializedQuestionBanks["宇宙探險"];
-    space[0].systemText = "【第一關：音樂心跳 (速度)】穿上太空衣飄浮在無重力太空中，速度應該是？";
-    space[0].choices[0].text = "🚀 輕飄盤、像在雲朵上慢動作飄浮 (慢板)";
-    space[0].choices[0].tag = "slow cosmic drifting tempo, floating feel";
-    space[0].choices.text = "🚀 火箭發射一樣狂奔 (急板)";
-    space[0].choices.tag = "hyper fast rocket propulsion speed, presto";
-    space.systemText = "【第二關：身體步伐 (拍號)】太空中沒有重力，身體沒有方向，這時拍子感覺應該？";
-    space.choices[0].text = "🌌 幾乎聽不出固定拍子，空中無限飄浮";
-    space.choices[0].tag = "floating tempo-free rubato rhythm, open time";
-    space[3].systemText = "【第四關：黑洞神秘 (調性)】望著黑色夜空中無數未知的星系，音樂顏色是？";
-    space[3].choices[0].text = "🌌 神祕又深邃的科幻小調";
-    space[3].choices[0].tag = "mysterious dark cinematic Minor Key";
-    space[6].systemText = "【第七關：未來法器 (主奏)】要彈奏出充滿未來科技感、像外星科技的聲音，哪種最合適？";
-    space[6].choices[0].text = "👽 叮叮咚咚的電子合成器與太空鍵盤 (Synthesizer)";
-    space[6].choices[0].tag = "sci-fi synthesizer lead, space pads, cosmic wave";
-    space[7].systemText = "【第八關：宇宙訊號 (特效)】在科幻電影中，太空會有特別聲音，你要加入？";
-    space[7].choices[0].text = "📡 太空艙低鳴、遠處雷達嗶嗶電波聲與流星劃過聲";
-    space[7].choices[0].tag = "space ambient drones, cosmic radar blips, sci-fi sweeps";
-
-    // 🌟 甜甜夢鄉
-    const sleep = specializedQuestionBanks["甜甜夢鄉"];
-    sleep[0].systemText = "【第一關：音樂心跳 (速度)】小動物閉上眼睛，月亮升起來了。催眠音樂的心跳是？";
-    sleep[0].choices[0].text = "🛌 慢吞吞、像搖籃輕輕搖擺 (安靜慢板)";
-    sleep[0].choices[0].tag = "slow peaceful lullaby tempo, 60 bpm, sleep";
-    sleep[3].systemText = "【第四關：甜蜜夢境 (調性)】夢境裡充滿粉紅色雲朵和甜甜的夢，音樂顏色應該是？";
-    sleep[3].choices[0].text = "☀️ 溫柔安心大調 (溫暖放鬆)";
-    sleep[3].choices[0].tag = "warm soothing Major Key, dreamy, child-like";
-    sleep[6].systemText = "【第七關：催眠法器 (主奏)】在這個溫馨、安靜的夢境裡，哪種樂器法器最合適？";
-    sleep[6].choices[0].text = "🧸 溫暖鋼琴與八音盒 (Felt Piano / Music Box)";
-    sleep[6].choices[0].tag = "warm felt piano melody, gentle music box glimmers, dreamy";
-
-    // 🌟 海底世界
-    const sea = specializedQuestionBanks["海底世界"];
-    sea[0].systemText = "【第一關：音樂心跳 (速度)】五顏六色小魚在身邊游動，水母慢慢飄浮。速度是？";
-    sea[0].choices[0].text = "🐠 慢悠悠、像在水中動作慢半拍 (慢板)";
-    sea[0].choices[0].tag = "slow flowing underwater tempo, relaxing, fluid";
-    sea[3].systemText = "【第四關：龍宮神話 (調性)】珊瑚礁閃爍著神祕七彩光芒，海底深處像水晶宮殿，調性選？";
-    sea[3].choices[0].text = "👑 夢幻神奇的東方五聲音階 (走進龍宮)";
-    sea[3].choices[0].tag = "dreamy underwater Pentatonic Scale, oriental sea palace";
-    sea[6].systemText = "【第七關：水流法器 (主奏)】海底世界彈奏旋律，哪種最適合模仿水流和泡泡？";
-    sea[6].choices[0].text = "💦 叮叮咚咚的豎琴、鋼琴與鋼片琴 (Harp & Celesta)";
-    sea[6].choices[0].tag = "harp glissandos, sparkling celesta lead, bubble effects";
-    sea[7].systemText = "【第八關：深海奇感 (特效)】聽！海底世界裡還有特別伴奏，加入什麼背景聲音？";
-    sea[7].choices[0].text = "🐳 咕嚕咕嚕泡泡聲、遠處鯨魚歌唱低鳴與水流聲";
-    sea[7].choices[0].tag = "underwater bubbling sound effect, distant whale songs, fluid";
-
-    // 🌟 闖關遊戲
-    const game = specializedQuestionBanks["闖關遊戲"];
-    game[0].systemText = "【第一關：音樂心跳 (速度)】馬力歐開始奔跑了！後面有怪獸追！速度應該是？";
-    game[0].choices[0].text = "👾 充滿精神、快步奔跑 (快板)";
-    game[0].choices[0].tag = "fast upbeat gaming tempo, retro run, 130 bpm";
-    game[0].choices[0].score = 1.5;
-    game[0].choices.text = "🐢 慢吞吞像在做夢睡覺";
-    game[0].choices.tag = "slow dreamy pace";
-    game[0].choices.score = 0.5;
-    game.systemText = "【第二關：跳躍節拍 (拍號)】遊戲主角跳過深溝，踩在方塊上，哪種拍子最配？";
-    game.choices[0].text = "🎮 充滿活力、蹦蹦跳跳的 4/4 四拍子";
-    game.choices[0].tag = "bouncy gaming 4/4 meter, retro chip";
-    game.systemText = "【第三關：彈跳跳音 (節奏型)】展現橫向捲軸遊戲的跳躍感，節奏該如何設計？";
-    game.choices[0].text = "⚡ 充滿切分音與『短促彈跳點』的復古節奏";
-    game.choices[0].tag = "staccato jumpy rhythm, syncopated game beats";
-    game[3].systemText = "【第四關：魔王降臨 (調性)】不好！大魔王出現了！音樂的調性顏色變成？";
-    game[3].choices[0].text = "👹 緊張刺激、充滿冒險感的小調";
-    game[3].choices[0].tag = "dramatic gaming Minor Key, adventure battle theme";
-    game[6].systemText = "【第七關：復古法器 (主奏)】要模仿紅白機或街機遊戲的聲音，哪種最合適？";
-    game[6].choices[0].text = "👾 復古 8-bit 電子合成器 (Chiptune / Square Wave)";
-    game[6].choices[0].tag = "retro 8-bit chiptune synthesizer, square waves, chiptune lead";
-    game[7].systemText = "【第八關：遊戲特效 (特效)】這可是最經典的闖關遊戲！背景加入什麼音效？";
-    game[7].choices[0].text = "🪙 復古的吃金幣、跳躍與遊戲過關「登登登」音效";
-    game[7].choices[0].tag = "gaming retro sound effects, coin ping, jump sfx, chiptune noises";
-
-    // 🌟 生日派對
-    const party = specializedQuestionBanks["生日派對"];
-    party[0].systemText = "【第一關：音樂心跳 (速度)】大家戴上生日帽準備吃蛋糕，派對音樂速度是？";
-    party[0].choices[0].text = "🎂 輕鬆愉快、像拍手唱歌 (中快板)";
-    party[0].choices[0].tag = "happy moderate allegro tempo, 108 bpm, joyful";
-    party.systemText = "【第二關：拍手聯歡 (拍號)】全體好朋友圍在一起拍手唱歌，哪種拍子最適合打拍子？";
-    party.choices[0].text = "👏 適合一邊拍手一邊搖晃的 4/4 四拍子";
-    party.choices[0].tag = "cheerful 4/4 clap-along meter, pop groove";
-    party[3].systemText = "【第四關：許願許諾 (調性)】大家一起唱著生日歌，這時音樂的顏色是？";
-    party[3].choices[0].text = "☀️ 明亮溫暖大調 (像太陽曬屁股一樣)";
-    party[3].choices[0].tag = "bright happy Major Key, festive party, sunny";
-    party[6].systemText = "【第七關：客廳彈唱 (主奏)】在這個溫馨開心的派對彈出旋律，哪種最合適？";
-    party[6].choices[0].text = "🎸 溫柔清脆的木吉他與原聲鋼琴 (Acoustic Guitar)";
-    party[6].choices[0].tag = "acoustic guitar strumming, bright piano chords, organic";
-    party[7].systemText = "【第八關：派對聲浪 (特效)】這可是最熱鬧的生日派對！背景要加入？";
-    party[7].choices[0].text = "🎉 開心笑聲、拍手聲、拉炮與切蛋糕聲";
-    party[7].choices[0].tag = "party ambiance, clapping hands, happy laughter, party horns pop";
+    ];
 }
 
-generateAllSpecializedBanks();
+// 學校等級制 (1 至 5 分)
+function calculateFinalGrade(rawScore) {
+    if (rawScore >= 15.0) return 5;
+    if (rawScore >= 12.0) return 4;
+    if (rawScore >= 9.0)  return 3;
+    if (rawScore >= 6.0)  return 2;
+    return 1;
+}
 
 // =========================================
-// 🔄 導航與交互邏輯
+// 🔄 頁面導航與事件綁定
 // =========================================
 function showPage(pageToShow) {
     [page1, pageCard, page2, page3, page4, page5].forEach(p => { 
@@ -643,6 +191,7 @@ function showPage(pageToShow) {
     }
 }
 
+// 綁定「開始體驗」按鈕
 if (startBtn) {
     startBtn.addEventListener('click', () => {
         initAudio(); 
@@ -657,6 +206,7 @@ if (startBtn) {
     });
 }
 
+// 音樂開關
 if (musicToggle) {
     musicToggle.addEventListener('click', () => {
         if (!bgMusic) return;
@@ -666,6 +216,7 @@ if (musicToggle) {
     });
 }
 
+// 抽卡點擊
 deckCards.forEach(card => {
     card.addEventListener('click', () => {
         const selectedMood = moodDatabase[Math.floor(Math.random() * moodDatabase.length)];
@@ -676,8 +227,8 @@ deckCards.forEach(card => {
         if (moodDesc) moodDesc.innerText = selectedMood.desc;
         
         adventureState.moodTitle = selectedMood.title;
-        adventureState.tags = []; // 重設 Prompt 關鍵字
-        adventureState.solveScore = 0; // 重設分數
+        adventureState.tags = [];
+        adventureState.solveScore = 0;
         
         if (deckArea) deckArea.classList.add('hidden-area');
         if (singleCardArea) singleCardArea.classList.remove('hidden-area');
@@ -771,7 +322,6 @@ if (uploadWallBtn) {
             }
         }
 
-        // 🌟 配合學校計分準則，換算為 1, 2, 3, 4, 5 的整數成績上傳
         const finalSolveScore = calculateFinalGrade(adventureState.solveScore).toString();
         uploadWallBtn.disabled = true;
         uploadWallBtn.innerText = "⏳ 正在刻入試算表石碑...";
@@ -805,15 +355,6 @@ if (uploadWallBtn) {
             uploadWallBtn.innerText = "🔮 刻入魔法石碑 (生成二維碼)";
         }
     });
-}
-
-// 🌟 將 12 題總得分（滿分 18）對接到 1 - 5 整數等級的計分函數
-function calculateFinalGrade(rawScore) {
-    if (rawScore >= 15.0) return 5; // 卓越 (83% - 100%)
-    if (rawScore >= 12.0) return 4; // 優良 (66% - 82%)
-    if (rawScore >= 9.0)  return 3; // 滿意 (50% - 65%)
-    if (rawScore >= 6.0)  return 2; // 基本 (33% - 49%)
-    return 1;                       // 需努力 (0% - 32%)
 }
 
 if (reDrawBtn) {
@@ -851,7 +392,6 @@ if (restartAdventureBtn) restartAdventureBtn.addEventListener('click', resetApp)
 
 if (nextToPage4Btn) {
     nextToPage4Btn.addEventListener('click', () => {
-        // 將 12 題累積的咒語 tags 連接成完美的古代咒語
         const promptText = `A high quality music track for ${adventureState.moodTitle}, ${adventureState.tags.join(', ')}. Perfect cinematic background composition.`;
         const promptEl = document.getElementById('resultPrompt');
         if (promptEl) promptEl.innerText = promptText;
@@ -864,7 +404,91 @@ if (nextToPage4Btn) {
 }
 
 // =========================================
-// 🧪 打字機與 12 題大冒險動態渲染系統
+// 🎵 Web Audio API 魔法音效引擎
+// =========================================
+let audioCtx;
+function initAudio() {
+    try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+    } catch(e) {}
+}
+
+function playTextBleep(isSystem = false) {
+    if (!audioCtx || !isMusicPlaying) return; 
+    try {
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        osc.type = 'square'; 
+        osc.frequency.setValueAtTime(isSystem ? 300 : 600, audioCtx.currentTime); 
+        gainNode.gain.setValueAtTime(0.03, audioCtx.currentTime); 
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.03); 
+        osc.connect(gainNode); gainNode.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.03); 
+    } catch(e){}
+}
+
+function playRitualFanfare() {
+    if (!audioCtx || !isMusicPlaying) return;
+    try {
+        const now = audioCtx.currentTime;
+        function playNote(freq, start, duration) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0, start);
+            gain.gain.linearRampToValueAtTime(0.12, start + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(start); osc.stop(start + duration);
+        }
+        playNote(523.25, now, 0.4);
+        playNote(659.25, now + 0.15, 0.4);
+        playNote(783.99, now + 0.3, 0.4);
+        playNote(987.77, now + 0.45, 0.5);
+        playNote(1046.50, now + 0.65, 1.2);
+    } catch(e){}
+}
+
+function playSpellSound(type) {
+    if (!audioCtx || !isMusicPlaying) return;
+    try {
+        const now = audioCtx.currentTime;
+        function playTone(freq, waveType, startTime, duration, vol=0.1) {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.type = waveType;
+            o.frequency.value = freq;
+            g.gain.setValueAtTime(0, startTime);
+            g.gain.linearRampToValueAtTime(vol, startTime + duration * 0.1);
+            g.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+            o.connect(g); g.connect(audioCtx.destination);
+            o.start(startTime); o.stop(startTime + duration);
+        }
+        switch (type) {
+            case 'Strings': playTone(440, 'sawtooth', now, 1.2, 0.05); playTone(659.25, 'sawtooth', now, 1.2, 0.05); break;
+            case 'Woodwinds': playTone(1046.50, 'sine', now, 0.8, 0.1); break;
+            case 'Brass': playTone(466.16, 'square', now, 0.6, 0.03); playTone(698.46, 'square', now+0.15, 0.6, 0.03); break;
+            case 'Piano': 
+                playTone(523.25, 'triangle', now, 0.4, 0.1); playTone(659.25, 'triangle', now+0.1, 0.4, 0.1);
+                playTone(783.99, 'triangle', now+0.2, 0.4, 0.1); playTone(1046.50, 'triangle', now+0.3, 0.8, 0.1);
+                break;
+            case 'Major Key': playTone(523.25, 'triangle', now, 0.8, 0.1); playTone(659.25, 'triangle', now, 0.8, 0.1); playTone(783.99, 'triangle', now, 0.8, 0.1); break;
+            case 'Minor Key': playTone(440, 'triangle', now, 0.8, 0.1); playTone(523.25, 'triangle', now, 0.8, 0.1); playTone(659.25, 'triangle', now, 0.8, 0.1); break;
+            case 'Pentatonic': [523.25, 587.33, 659.25, 783.99, 880].forEach((f, i) => playTone(f, 'sine', now + i*0.12, 0.4, 0.08)); break;
+            case 'Slow tempo': playTone(800, 'square', now, 0.08, 0.02); playTone(800, 'square', now+0.5, 0.08, 0.02); break;
+            case 'Moderate tempo': playTone(800, 'square', now, 0.08, 0.02); playTone(800, 'square', now+0.25, 0.08, 0.02); break;
+            case 'Fast tempo': playTone(800, 'square', now, 0.08, 0.02); playTone(800, 'square', now+0.12, 0.08, 0.02); break;
+            case 'fire': playTone(150, 'sawtooth', now, 0.8, 0.1); break;
+            case 'ice': playTone(1200, 'sine', now, 0.4, 0.1); break;
+            case 'music': playTone(659.25, 'triangle', now, 0.8, 0.1); break;
+        }
+    } catch(e){}
+}
+
+// =========================================
+// 📜 打字機與 12 題大冒險動態渲染系統
 // =========================================
 let typingInterval;
 function typeWriterEffect(element, htmlString, speed, onComplete, isSystem = false) {
@@ -893,17 +517,14 @@ function typeWriterEffect(element, htmlString, speed, onComplete, isSystem = fal
 
 function renderRPGStep(stepIndex) {
     adventureState.step = stepIndex;
-    
-    // 獲取目前抽中卡片的專屬題庫，若無則預設加載「下雨的窗邊」
-    const currentBank = specializedQuestionBanks[adventureState.moodTitle] || specializedQuestionBanks["下雨的窗邊"];
-    const currentQuestion = currentBank[stepIndex];
+    const currentQuestions = getThemeQuestions(adventureState.moodTitle);
+    const currentQuestion = currentQuestions[stepIndex];
     
     const choicesContainer = document.getElementById('adventureChoices');
     const systemBox = document.getElementById('systemBox');
     const tutorTextElement = document.getElementById('tutorText');
     const roomTitle = document.getElementById('rpgRoomTitle');
 
-    // 動態修改公會地下室名稱
     if (roomTitle) {
         roomTitle.innerText = `=== 魔法公會：【${adventureState.moodTitle}】考驗 (第 ${stepIndex + 1} / 12 步) ===`;
     }
@@ -912,19 +533,17 @@ function renderRPGStep(stepIndex) {
     if (tutorTextElement) tutorTextElement.innerHTML = '';
     
     const showChoices = () => {
-        if (!choicesContainer) return;
+        if (!choicesContainer || !currentQuestion) return;
         currentQuestion.choices.forEach(choice => {
             const btn = document.createElement('button'); 
             btn.className = 'retro-choice-btn'; 
             btn.innerHTML = choice.text;
             btn.addEventListener('click', () => {
-                // 累積計分與 Suno Prompt
                 adventureState.solveScore += choice.score;
                 adventureState.tags.push(choice.tag);
                 
                 if (choice.sound) playSpellSound(choice.sound);
 
-                // 判斷是否答完 12 題
                 if (stepIndex >= 11) {
                     triggerEvaluationReveal();
                 } else {
@@ -936,7 +555,7 @@ function renderRPGStep(stepIndex) {
         choicesContainer.style.display = 'grid'; 
     };
 
-    if (currentQuestion.systemText) {
+    if (currentQuestion && currentQuestion.systemText) {
         if (systemBox) systemBox.style.display = 'block';
         typeWriterEffect(systemBox, currentQuestion.systemText, 30, () => {
             const dialogueText = `「做得好！選好你的魔法音樂元素後，我們就進行下一步吧！」`;
@@ -954,13 +573,11 @@ function triggerEvaluationReveal() {
     }
     playRitualFanfare();
 
-    // 🌟 計算學校計分等級 (1 - 5 分)
     const finalGrade = calculateFinalGrade(adventureState.solveScore);
     const scoreEl = document.getElementById('problemSolvingScore');
     if (scoreEl) scoreEl.innerText = `${finalGrade} / 5 分`;
     showPage(page3); 
     
-    // 依分數給予翁 sir 的專屬評語
     let evalDialogue = "";
     if (finalGrade === 5) {
         evalDialogue = `「太不可思議了！你的『探究解難能力』獲得了【5分】滿分！你精準地掌控了所有的音樂元素，簡直是百年一遇的配樂天才！」`;
@@ -1084,26 +701,31 @@ function initFF3DBackground() {
         if (typeof THREE === 'undefined') return;
         const container = document.getElementById('ff-canvas-container');
         if (!container || renderer) return;
+
         scene = new THREE.Scene();
         camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 1, 3000);
         camera.position.set(0, 0, 680);
+
         renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         container.innerHTML = '';
         container.appendChild(renderer.domElement);
+
         const crystalMeshGeo = new THREE.OctahedronGeometry(110, 0);
         const crystalMeshMat = new THREE.MeshBasicMaterial({
             color: 0x67e8f9, wireframe: true, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending
         });
         crystalMesh = new THREE.Mesh(crystalMeshGeo, crystalMeshMat);
         scene.add(crystalMesh);
+
         const innerGeo = new THREE.OctahedronGeometry(75, 0);
         const innerMat = new THREE.MeshBasicMaterial({
             color: 0xd946ef, transparent: true, opacity: 0.3, blending: THREE.AdditiveBlending
         });
         const innerCrystal = new THREE.Mesh(innerGeo, innerMat);
         crystalMesh.add(innerCrystal);
+
         outerRingsGroup = new THREE.Group();
         const ringConfigs = [
             { radius: 210, width: 12, color: 0x38bdf8, rx: 1.1, ry: 0.3 },
@@ -1121,11 +743,13 @@ function initFF3DBackground() {
             outerRingsGroup.add(ring);
         });
         scene.add(outerRingsGroup);
+
         const starCount = 1200;
         const starGeo = new THREE.BufferGeometry();
         const starPos = new Float32Array(starCount * 3);
         const starColors = new Float32Array(starCount * 3);
         const palette = [new THREE.Color(0x93c5fd), new THREE.Color(0xd8b4fe), new THREE.Color(0x67e8f9), new THREE.Color(0xfbcfe8)];
+
         for (let i = 0; i < starCount; i++) {
             starPos[i * 3] = (Math.random() - 0.5) * 1600;
             starPos[i * 3 + 1] = (Math.random() - 0.5) * 1600;
@@ -1135,12 +759,14 @@ function initFF3DBackground() {
         }
         starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
         starGeo.setAttribute('color', new THREE.BufferAttribute(starColors, 3));
+
         const tex = createGlowPointTexture();
         const starMat = new THREE.PointsMaterial({
             size: 14, map: tex, vertexColors: true, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false
         });
         starField = new THREE.Points(starGeo, starMat);
         scene.add(starField);
+
         const waveGeo = new THREE.PlaneGeometry(1600, 1000, 32, 24);
         const waveMat = new THREE.MeshBasicMaterial({
             color: 0x1e3a8a, wireframe: true, transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending
@@ -1149,13 +775,14 @@ function initFF3DBackground() {
         waveMesh.rotation.x = -Math.PI / 2.3;
         waveMesh.position.y = -260;
         scene.add(waveMesh);
+
         window.addEventListener('mousemove', (e) => {
             mouseX = (e.clientX - window.innerWidth / 2) * 0.2;
             mouseY = (e.clientY - window.innerHeight / 2) * 0.2;
         });
         window.addEventListener('resize', onWindowResize);
         animateFFBackground();
-    } catch(e){}
+    } catch(err){}
 }
 
 function onWindowResize() {
@@ -1196,9 +823,18 @@ function animateFFBackground() {
     } catch(e){}
 }
 
-window.addEventListener('DOMContentLoaded', () => {
+// 確保 Three.js 背景與靈感牆能在載入後立即執行
+function initApp() {
     try {
         initFF3DBackground();
         fetchWallData();
-    } catch(e){}
-});
+    } catch(e) {
+        console.error("初始化錯誤:", e);
+    }
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    initApp();
+}
