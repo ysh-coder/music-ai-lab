@@ -60,14 +60,14 @@ let adventureState = {
 };
 
 // =========================================
-// 🎓 全新 10 主題 × 12 題 (共 120 題) 小六專屬題庫
+// 🎓 10 主題 × 12 題 (共 120 題) 小六專屬題庫
 // =========================================
 const specializedQuestionBanks = {
     "熱血運動會": [
         {
             systemText: "【第一關：音樂心跳 (速度)】在起跑線準備衝刺了！這首接力賽配樂，心跳應該有多快？",
             choices: [
-                { text: "🐢 散步散心 (慢慢的，慢板)", score: 0.5, tag: "slow walking tempo", sound: "Slow tempo" },
+                { text: "運輸散步 (慢慢的，慢板)", score: 0.5, tag: "slow walking tempo", sound: "Slow tempo" },
                 { text: "🚶 慢跑熱身 (中等速度，行板)", score: 1.0, tag: "moderate jogging tempo, 100 bpm", sound: "Moderate tempo" },
                 { text: "🏃 終點衝刺 (非常快，急板)", score: 1.5, tag: "fast upbeat tempo, energetic, 138 bpm", sound: "Fast tempo" }
             ]
@@ -391,7 +391,7 @@ function generateAllSpecializedBanks() {
             ]
         },
         {
-            systemText: "【第三關：飛車俯衝 (節節奏型)】配合雲霄飛車上一會兒下一會兒的離心力，節奏要？",
+            systemText: "【第三關：飛車俯衝 (節奏型)】配合雲霄飛車上一會兒下一會兒的離心力，節奏要？",
             choices: [
                 { text: "🎢 忽快忽慢、充滿彈性與起伏的節奏", score: 1.5, tag: "rhythmic rubato, shifting accents, rollercoaster momentum", sound: "Moderate tempo" },
                 { text: "🤖 像機械人一樣完全不變、死板的節奏", score: 0.5, tag: "monotonous rigid mechanical clock tick beat", sound: "Slow tempo" },
@@ -807,7 +807,7 @@ if (uploadWallBtn) {
     });
 }
 
-// 🌟 新增：將 12 題總得分（滿分 18）對接到 1 - 5 整數等級的計分函數
+// 🌟 將 12 題總得分（滿分 18）對接到 1 - 5 整數等級的計分函數
 function calculateFinalGrade(rawScore) {
     if (rawScore >= 15.0) return 5; // 卓越 (83% - 100%)
     if (rawScore >= 12.0) return 4; // 優良 (66% - 82%)
@@ -954,7 +954,7 @@ function triggerEvaluationReveal() {
     }
     playRitualFanfare();
 
-    // 🌟 計算學校計分等級 (1 - 5 顆星/分)
+    // 🌟 計算學校計分等級 (1 - 5 分)
     const finalGrade = calculateFinalGrade(adventureState.solveScore);
     const scoreEl = document.getElementById('problemSolvingScore');
     if (scoreEl) scoreEl.innerText = `${finalGrade} / 5 分`;
@@ -1155,7 +1155,7 @@ function initFF3DBackground() {
         });
         window.addEventListener('resize', onWindowResize);
         animateFFBackground();
-    } catch(err){}
+    } catch(e){}
 }
 
 function onWindowResize() {
