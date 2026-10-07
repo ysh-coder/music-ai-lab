@@ -47,36 +47,40 @@ body {
     max-width: 650px; 
     position: relative; 
     z-index: 10; 
-    /* 💡 動態高度設定，保留上下安全間距，超出時自動啟用容器內滾動 */
-    max-height: 90vh; 
+    /* 💡 動態高度設定，保留上下安全間距 */
+    max-height: 92vh; 
     overflow-y: auto; 
     -webkit-overflow-scrolling: touch; /* 🍎 讓 iOS/Safari 觸控滑動更滑順 */
     border-radius: 24px;
 }
 
-/* 🧪 為主容器客製化滾動條樣式，使其與 3D 科技感主題融合 */
-.app-container::-webkit-scrollbar {
+/* 🧪 網頁整體客製化滾動條 */
+.app-container::-webkit-scrollbar,
+.retro-page::-webkit-scrollbar {
     width: 6px;
 }
-.app-container::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.1);
+.app-container::-webkit-scrollbar-track,
+.retro-page::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
 }
-.app-container::-webkit-scrollbar-thumb {
+.app-container::-webkit-scrollbar-thumb,
+.retro-page::-webkit-scrollbar-thumb {
     background: rgba(96, 165, 250, 0.4);
     border-radius: 10px;
 }
-.app-container::-webkit-scrollbar-thumb:hover {
+.app-container::-webkit-scrollbar-thumb:hover,
+.retro-page::-webkit-scrollbar-thumb:hover {
     background: rgba(236, 72, 153, 0.6);
 }
 
 /* 現代首頁與抽卡版面 */
 .page { 
-    background: rgba(8, 14, 28, 0.75); /* 微調透明度，提高文字在滾動時的閱讀性 */
+    background: rgba(8, 14, 28, 0.75); 
     backdrop-filter: blur(16px); 
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(147, 197, 253, 0.3); 
     border-radius: 24px; 
-    padding: 30px 25px; /* 稍微縮小內邊距，騰出更多空間給手機顯示 */
+    padding: 30px 25px; 
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), inset 0 0 25px rgba(96, 165, 250, 0.15); 
     text-align: center; 
     transition: opacity 0.4s ease, transform 0.4s ease; 
@@ -251,8 +255,11 @@ button {
     backdrop-filter: none !important; 
     font-family: 'DotGothic16', monospace !important; 
     padding: 20px !important; 
-    /* 💡 允許內部滾動，確保在小螢幕手機上 RPG 選項不被切掉 */
+    
+    /* 💡 核心修復：解除隱藏限制，並限制最大高度，當內容超出時自動出現復古滾動條 */
+    max-height: 90vh !important;
     overflow-y: auto !important; 
+    -webkit-overflow-scrolling: touch;
 }
 .retro-page * { font-family: 'DotGothic16', monospace !important; letter-spacing: 1px; }
 .retro-title { font-size: 1.25rem; color: #ffd700; margin-bottom: 12px; text-shadow: 2px 2px 0px #aa0000; }
@@ -318,7 +325,7 @@ button {
 .retro-portal-btn:hover { background: #00ffff; color: #000; }
 
 .retro-monument-box { background: #1a1a1a; border: 2px dashed #aaa; padding: 10px 15px; margin-bottom: 10px; }
-/* 📱 手機寬度窄時，讓「學徒代號」與「Suno 連結」改為上下單欄排列，避免擠在一起 */
+/* 📱 手機寬度窄時，讓「學徒代號」與「Suno 連結」改為上下單欄排列 */
 .retro-input-grid { 
     display: grid; 
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
@@ -346,3 +353,35 @@ button {
 
 .qr-wrapper { background: #ffffff; padding: 8px; border-radius: 8px; display: inline-block; margin-bottom: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: 1px solid rgba(96, 165, 250, 0.2); }
 .qr-canvas { display: block; width: 130px; height: 130px; }
+
+/* =================================================================
+   📱 RWD 微調：當螢幕高度（Height）低於 800px 時自動縮減排版尺寸，防溢出
+   ================================================================= */
+@media screen and (max-height: 800px) {
+    .retro-page {
+        padding: 12px !important;
+    }
+    .retro-scene-banner {
+        max-height: 85px !important; /* 縮減地下室場景 Banner */
+    }
+    .pixel-wizard-img {
+        width: 65px !important; /* 縮小翁sir頭像 */
+        height: 65px !important;
+    }
+    .retro-dialogue {
+        min-height: 70px !important; /* 降低對話框最小高度 */
+        padding: 6px 12px !important;
+    }
+    #tutorText, #ritualText, #evalTutorText {
+        font-size: 0.85rem !important; /* 微調字體 */
+    }
+    .pixel-magic-circle {
+        font-size: 1rem !important; /* 縮減第四頁魔法陣 */
+    }
+    .retro-scroll-box {
+        padding: 8px 12px !important;
+    }
+    .retro-input {
+        padding: 6px !important; /* 縮減表單輸入框高度 */
+    }
+}
