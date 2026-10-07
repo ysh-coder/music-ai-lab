@@ -11,7 +11,7 @@ body {
     position: relative;
 }
 
-/* 🔊 背景音樂按鈕：確保永遠在最上層且可點擊 */
+/* 🔊 背景音樂按鈕：永遠在最上層 */
 .music-toggle-btn { 
     position: fixed; 
     top: 20px; 
@@ -34,7 +34,7 @@ body {
 }
 .music-toggle-btn:hover { background: rgba(255, 255, 255, 0.4); transform: scale(1.1); }
 
-/* 🌌 Final Fantasy 3D 渲染畫布容器：強制 pointer-events 穿透，絕對不阻擋點擊 */
+/* 🌌 Final Fantasy 3D 渲染畫布容器：允許點擊直接穿透畫布 */
 .animated-bg { 
     position: fixed; 
     top: 0; 
@@ -45,7 +45,7 @@ body {
     transition: opacity 0.5s ease; 
     background: radial-gradient(circle at 50% 40%, #0d1b38 0%, #030712 100%);
     overflow: hidden;
-    pointer-events: none !important; /* 👈 關鍵修復：點擊直接穿透畫布 */
+    pointer-events: none !important;
 }
 
 #ff-canvas-container canvas {
@@ -55,22 +55,22 @@ body {
     width: 100% !important;
     height: 100% !important;
     display: block;
-    pointer-events: none !important; /* 👈 關鍵修復：確保 Three.js 畫布不阻擋按鈕 */
+    pointer-events: none !important;
 }
 
 .retro-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -2; background-color: #000000; }
 
-/* 📱 核心容器：設定 z-index 高於背景，並開啟 pointer-events 確保按鈕可按 */
+/* 📱 核心容器：設定 z-index 高於背景 */
 .app-container { 
     width: 100%; 
     max-width: 650px; 
     position: relative; 
-    z-index: 100 !important; /* 👈 關鍵修復：確保主容器在 3D 背景之上 */
+    z-index: 100 !important; 
     max-height: 92vh; 
     overflow-y: auto; 
     -webkit-overflow-scrolling: touch; 
     border-radius: 24px;
-    pointer-events: auto !important; /* 👈 關鍵修復：允許容器內所有點擊 */
+    pointer-events: auto !important;
 }
 
 /* 🧪 網頁整體客製化滾動條 */
@@ -142,7 +142,7 @@ p { font-size: 0.95rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 25px; }
 .subtitle { font-size: 0.9rem; color: #94a3b8; margin-bottom: 20px; }
 .button-group { display: flex; gap: 15px; margin-top: 20px; }
 
-/* 按鈕：確保 pointer-events 開啟且 z-index 足夠 */
+/* 按鈕：確保高層級可點擊 */
 button { 
     padding: 14px 20px; 
     border: none; 
@@ -154,8 +154,8 @@ button {
     flex: 1; 
     justify-content: center;
     position: relative;
-    z-index: 200 !important; /* 👈 確保按鈕層級極高 */
-    pointer-events: auto !important; /* 👈 確保隨時可點擊 */
+    z-index: 200 !important; 
+    pointer-events: auto !important; 
 }
 .primary-btn { 
     background: linear-gradient(135deg, #6366f1, #ec4899) !important; 
