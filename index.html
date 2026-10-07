@@ -55,7 +55,7 @@
                         <div class="card-face card-back-design">
                             <img src="卡片背面.jfif" alt="卡片背面" class="full-card-back-img">
                         </div>
-                        <!-- 🃏 卡牌正面 -->
+                        <!-- 🃏 卡牌正面 (100% 滿版原圖，無多餘文字覆蓋) -->
                         <div class="card-face card-front-design">
                             <div class="mood-img-wrap">
                                 <img id="moodImg" src="" alt="氣氛插畫" class="mood-card-img">
@@ -127,7 +127,6 @@
         <section id="page4" class="page retro-page hidden">
             <h2 class="retro-title">=== 禁忌魔法 召喚殿堂 ===</h2>
             
-            <!-- 新增：補足第四頁翁sir 的提示藍色對話框 -->
             <div class="rpg-main-layout" style="margin-bottom: 15px;">
                 <div class="tutor-avatar retro-avatar" style="margin-bottom: 0;">
                     <img src="Gemini_Generated_Image_rtdwrqrtdwrqrtdw.jfif" alt="魔法師翁sir" class="pixel-wizard-img" style="width: 70px; height: 70px;">
@@ -152,23 +151,31 @@
                     <button type="button" class="retro-portal-btn">🌀 開啟次元裂縫 (前往 Suno)</button>
                 </a>
             </div>
-            <!-- 刻入靈感石碑表單 -->
+
+            <!-- 刻入靈感石碑表單 (已徹底隱藏長網址輸入格) -->
             <div class="retro-monument-box">
-                <div class="scroll-header" style="color: #ffd700; margin-bottom: 8px;">🗿 【刻入公會靈感石碑】</div>
-                <div class="retro-input-grid">
-                    <div style="text-align: left;">
-                        <label style="color: #fff; font-size: 0.85rem;">▶ 學徒代號:</label>
-                        <input type="text" id="authorName" class="retro-input" placeholder="請輸入姓名...">
-                    </div>
-                    <div style="text-align: left;">
-                        <label style="color: #fff; font-size: 0.85rem;">▶ Suno 共鳴連結:</label>
-                        <input type="text" id="sunoUrlInput" class="retro-input" placeholder="貼上分享網址...">
-                    </div>
+                <div class="scroll-header" style="color: #ffd700; margin-bottom: 10px;">🗿 【刻入公會靈感石碑】</div>
+                
+                <div style="text-align: left; margin-bottom: 12px;">
+                    <label style="color: #fff; font-size: 0.95rem; display: block; margin-bottom: 6px;">▶ 請輸入學徒代號 (姓名):</label>
+                    <input type="text" id="authorName" class="retro-input" placeholder="請輸入姓名..." style="width: 100%; font-size: 0.95rem;">
                 </div>
-                <button id="uploadWallBtn" class="retro-action-btn" style="background: #ffd700; color: #000; font-weight: bold; margin-top: 15px; padding: 10px;">
+
+                <!-- 隱藏的網址儲存欄位，畫面上完全看不見長網址 -->
+                <input type="hidden" id="sunoUrlInput" value="">
+
+                <div style="margin-bottom: 12px;">
+                    <button type="button" id="quickPasteBtn" class="retro-btn-escape" style="border: 1px dashed #00ffff; color: #00ffff; padding: 8px 12px; width: 100%; font-size: 0.85rem; cursor: pointer; text-align: center;">
+                        🔗 點擊載入已複製的 Suno 歌曲連結
+                    </button>
+                    <p id="urlStatusText" style="color: #4ade80; font-size: 0.8rem; margin-top: 5px; display: none; text-align: center;">✨ 已成功注入歌曲共鳴！</p>
+                </div>
+
+                <button id="uploadWallBtn" class="retro-action-btn" style="background: #ffd700; color: #000; font-weight: bold; padding: 12px;">
                     🔮 刻入魔法石碑 (生成二維碼)
                 </button>
             </div>
+
             <div class="button-group retro-footer" style="margin-top: 15px;">
                 <button id="cancelToPage3Btn" class="retro-btn-escape">返回能力結算</button>
             </div>
