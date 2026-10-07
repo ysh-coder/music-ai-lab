@@ -1,5 +1,4 @@
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Noto Sans TC', sans-serif; }
-
 body { 
     min-height: 100vh; 
     display: flex; 
@@ -10,11 +9,10 @@ body {
     overflow-y: auto; 
     padding: 20px 10px;
 }
-
 .music-toggle-btn { position: fixed; top: 20px; right: 20px; z-index: 100; background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 50%; width: 50px; height: 50px; font-size: 1.5rem; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; }
 .music-toggle-btn:hover { background: rgba(255, 255, 255, 0.4); transform: scale(1.1); }
 
-/* 🌌 Final Fantasy 3D 渲染畫布容器（保持固定，不跟隨滾動） */
+/* 🌌 Final Fantasy 3D 渲染畫布容器 */
 .animated-bg { 
     position: fixed; 
     top: 0; 
@@ -27,7 +25,6 @@ body {
     overflow: hidden;
     pointer-events: none; 
 }
-
 #ff-canvas-container canvas {
     position: absolute;
     top: 0;
@@ -37,10 +34,9 @@ body {
     display: block;
     pointer-events: none;
 }
-
 .retro-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -2; background-color: #000000; }
 
-/* 📱 調整核心容器 */
+/* 📱 核心容器 */
 .app-container { 
     width: 100%; 
     max-width: 650px; 
@@ -83,10 +79,8 @@ body {
     text-align: center; 
     transition: opacity 0.4s ease, transform 0.4s ease; 
 }
-
 .page.hidden { display: none !important; opacity: 0; transform: scale(0.95) translateY(20px); }
 .page.active { display: block; opacity: 1; transform: scale(1) translateY(0); }
-
 .hidden-area { display: none !important; }
 .hidden-btn { display: none !important; }
 
@@ -103,12 +97,10 @@ body {
     animation: floatingIcon 3s ease-in-out infinite;
 }
 .home-icon-img { width: 100%; height: 100%; object-fit: cover; display: block; }
-
 @keyframes floatingIcon {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-8px); box-shadow: 0 10px 25px rgba(168, 85, 247, 0.7); }
 }
-
 h1 { 
     font-size: 2.1rem; 
     margin-bottom: 10px; 
@@ -121,7 +113,6 @@ h1 {
 h2 { font-size: 1.6rem; margin-bottom: 5px; font-weight: 500; }
 p { font-size: 0.95rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 25px; }
 .subtitle { font-size: 0.9rem; color: #94a3b8; margin-bottom: 20px; }
-
 .button-group { display: flex; gap: 15px; margin-top: 20px; }
 button { 
     padding: 14px 20px; 
@@ -137,7 +128,6 @@ button {
     z-index: 20;
     pointer-events: auto;
 }
-
 .primary-btn { 
     background: linear-gradient(135deg, #6366f1, #ec4899) !important; 
     color: #ffffff !important; 
@@ -187,7 +177,6 @@ button {
     -webkit-transform-style: preserve-3d;
 }
 .playing-card.flipped { transform: rotateY(180deg) scale(1.03); } 
-
 .card-face { 
     position: absolute; 
     width: 100%; 
@@ -210,7 +199,7 @@ button {
 }
 .full-card-back-img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-/* 🃏 卡牌正面：【完全修正】100%滿版無縫展示原始卡牌，無多餘留白與邊框 */
+/* 🃏 卡牌正面 */
 .card-front-design { 
     padding: 0 !important; 
     background: #000 !important; 
@@ -224,7 +213,6 @@ button {
     visibility: hidden;
     transition: opacity 0.2s ease, visibility 0.2s ease;
 }
-
 .playing-card.flipped .card-front-design {
     opacity: 1;
     visibility: visible;
@@ -255,7 +243,7 @@ button {
     display: block; 
 }
 
-/* 💡 徹底隱藏 HTML 重複的標題與描述，完全由原圖呈現 */
+/* 徹底隱藏 HTML 重複的標題與描述，完全由原圖呈現 */
 .mood-info { 
     display: none !important; 
 }
@@ -275,23 +263,17 @@ button {
 }
 .retro-page * { font-family: 'DotGothic16', monospace !important; letter-spacing: 1px; }
 .retro-title { font-size: 1.25rem; color: #ffd700; margin-bottom: 12px; text-shadow: 2px 2px 0px #aa0000; }
-
 .retro-scene-container { width: 100%; margin-bottom: 12px; border: 3px solid #fff; box-shadow: 0 0 10px rgba(0, 0, 0, 0.8), inset 0 0 10px rgba(0, 0, 0, 0.5); background: #000; overflow: hidden; }
 .retro-scene-banner { width: 100%; height: auto; max-height: 130px; display: block; object-fit: cover; image-rendering: pixelated; }
-
 .rpg-main-layout { display: flex; gap: 15px; width: 100%; align-items: center; margin-bottom: 12px; }
 .retro-avatar { margin-bottom: 0px !important; flex-shrink: 0; }
 .pixel-wizard-img { width: 80px; height: 80px; image-rendering: pixelated; border: 3px solid #ffd700; border-radius: 8px; background: #000; box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); object-fit: cover; }
-
 .retro-dialogue { background: #0000aa; border: 4px solid #fff; padding: 10px 15px !important; width: 100%; text-align: left; margin-bottom: 0px !important; min-height: 90px !important; box-shadow: inset 4px 4px 0px rgba(0,0,0,0.5); }
 #tutorName, #ritualTutorName, #evalTutorName { color: #ffff00; font-size: 1rem; margin-bottom: 5px; text-shadow: 2px 2px 0 #000; }
 #tutorText, #ritualText, #evalTutorText { font-size: 0.95rem; line-height: 1.5; color: #fff; text-shadow: 2px 2px 0 #000; }
-
 .typing-cursor::after { content: '▍'; animation: blink 1s step-end infinite; }
 @keyframes blink { 50% { opacity: 0; } }
-
 .retro-system-box { background: #222; border: 2px solid #888; color: #ccc; padding: 8px 12px; width: 100%; text-align: left; margin-bottom: 10px; font-size: 0.9rem; box-shadow: inset 2px 2px 0px rgba(0,0,0,0.5); line-height: 1.4; }
-
 .retro-choices { 
     display: grid !important; 
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important; 
@@ -302,7 +284,6 @@ button {
 .retro-choice-btn:hover { background: #fff; color: #000; }
 .retro-choice-btn::before { content: "　"; margin-right: 6px; }
 .retro-choice-btn:hover::before { content: "▶"; color: #000; }
-
 .retro-footer { margin-top: 15px; display: flex; gap: 10px; width: 100%; }
 .retro-btn-escape { background: transparent; border: 2px dashed #888; color: #aaa; padding: 8px; margin-top: 0px; cursor: pointer; font-size: 0.9rem; flex: 1; text-align: center; }
 .retro-btn-escape:hover { color: #fff; border-color: #fff; }
@@ -316,25 +297,20 @@ button {
     60% { transform: translate(-5px, -4px); }
     80% { transform: translate(5px, 4px); }
 }
-
 .pixel-magic-circle-container { margin-bottom: 15px; }
 .pixel-magic-circle { display: inline-block; color: #e879f9; font-size: 1.2rem; letter-spacing: 5px; text-shadow: 0 0 10px #d946ef; animation: pulseCircle 2s infinite ease-in-out; }
-
 @keyframes pulseCircle {
     0%, 100% { transform: scale(1); opacity: 0.7; }
     50% { transform: scale(1.1); opacity: 1; text-shadow: 0 0 20px #ff00ea; }
 }
-
 .retro-scroll-box { background: #111; border: 3px double #ffd700; padding: 10px 15px; margin-bottom: 10px; text-align: left; }
 .scroll-header { font-size: 0.95rem; color: #ffd700; margin-bottom: 6px; }
 .retro-spell-content { font-size: 0.9rem; color: #fff; line-height: 1.5; margin-bottom: 10px; }
 .retro-action-btn { width: 100%; background: #000; border: 2px solid #ffd700; color: #ffd700; padding: 10px; font-size: 1rem; cursor: pointer; transition: none; }
 .retro-action-btn:hover { background: #ffd700; color: #000; }
-
 .retro-portal-box { background: #05051a; border: 2px solid #00ffff; padding: 10px; margin-bottom: 10px; text-align: center; }
 .retro-portal-btn { width: 100%; background: #000; border: 2px solid #00ffff; color: #00ffff; padding: 8px; font-size: 0.95rem; cursor: pointer; }
 .retro-portal-btn:hover { background: #00ffff; color: #000; }
-
 .retro-monument-box { background: #1a1a1a; border: 2px dashed #aaa; padding: 10px 15px; margin-bottom: 10px; }
 .retro-input-grid { 
     display: grid; 
@@ -355,43 +331,21 @@ button {
 .wall-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; max-height: 55vh; overflow-y: auto; padding: 10px; }
 .wall-grid::-webkit-scrollbar { width: 5px; }
 .wall-grid::-webkit-scrollbar-thumb { background: rgba(96, 165, 250, 0.3); border-radius: 10px; }
-
 .wall-item { background: rgba(10, 20, 42, 0.65); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 2px solid rgba(96, 165, 250, 0.35); border-radius: 16px; padding: 15px; text-align: center; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(96, 165, 250, 0.15); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
 .wall-item:hover { transform: translateY(-8px); border-color: #ec4899; box-shadow: 0 12px 30px rgba(236, 72, 153, 0.35); }
 .wall-item h4 { color: #e0f2fe; font-size: 1.05rem; margin-bottom: 3px; font-weight: 700; }
 .wall-item .wall-mood { color: #93c5fd; font-size: 0.85rem; margin-bottom: 12px; }
-
 .qr-wrapper { background: #ffffff; padding: 8px; border-radius: 8px; display: inline-block; margin-bottom: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: 1px solid rgba(96, 165, 250, 0.2); }
 .qr-canvas { display: block; width: 130px; height: 130px; }
 
-/* =================================================================
-   📱 RWD 微調
-   ================================================================= */
+/* 📱 RWD 微調 */
 @media screen and (max-height: 800px) {
-    .retro-page {
-        padding: 12px !important;
-    }
-    .retro-scene-banner {
-        max-height: 85px !important;
-    }
-    .pixel-wizard-img {
-        width: 65px !important;
-        height: 65px !important;
-    }
-    .retro-dialogue {
-        min-height: 70px !important;
-        padding: 6px 12px !important;
-    }
-    #tutorText, #ritualText, #evalTutorText {
-        font-size: 0.85rem !important;
-    }
-    .pixel-magic-circle {
-        font-size: 1rem !important;
-    }
-    .retro-scroll-box {
-        padding: 8px 12px !important;
-    }
-    .retro-input {
-        padding: 6px !important;
-    }
+    .retro-page { padding: 12px !important; }
+    .retro-scene-banner { max-height: 85px !important; }
+    .pixel-wizard-img { width: 65px !important; height: 65px !important; }
+    .retro-dialogue { min-height: 70px !important; padding: 6px 12px !important; }
+    #tutorText, #ritualText, #evalTutorText { font-size: 0.85rem !important; }
+    .pixel-magic-circle { font-size: 1rem !important; }
+    .retro-scroll-box { padding: 8px 12px !important; }
+    .retro-input { padding: 6px !important; }
 }
