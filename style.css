@@ -1,11 +1,21 @@
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Noto Sans TC', sans-serif; }
 
-body { min-height: 100vh; display: flex; justify-content: center; align-items: center; color: #ffffff; overflow: hidden; background-color: #030712; }
+body { 
+    min-height: 100vh; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    color: #ffffff; 
+    background-color: #030712;
+    /* 📱 允許身體在行動裝置上滾動，防止鍵盤彈出時卡死 */
+    overflow-y: auto; 
+    padding: 20px 10px;
+}
 
 .music-toggle-btn { position: fixed; top: 20px; right: 20px; z-index: 100; background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 50%; width: 50px; height: 50px; font-size: 1.5rem; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; }
 .music-toggle-btn:hover { background: rgba(255, 255, 255, 0.4); transform: scale(1.1); }
 
-/* 🌌 Final Fantasy 3D 渲染畫布容器 */
+/* 🌌 Final Fantasy 3D 渲染畫布容器（保持固定，不跟隨滾動） */
 .animated-bg { 
     position: fixed; 
     top: 0; 
@@ -31,24 +41,42 @@ body { min-height: 100vh; display: flex; justify-content: center; align-items: c
 
 .retro-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -2; background-color: #000000; }
 
+/* 📱 調整核心容器：允許內容超出時在容器內滾動，並優化平板/手機尺寸 */
 .app-container { 
-    width: 95%; 
+    width: 100%; 
     max-width: 650px; 
     position: relative; 
     z-index: 10; 
-    max-height: 95vh; 
-    overflow: hidden; 
-    padding-right: 0px; 
+    /* 💡 動態高度設定，保留上下安全間距，超出時自動啟用容器內滾動 */
+    max-height: 90vh; 
+    overflow-y: auto; 
+    -webkit-overflow-scrolling: touch; /* 🍎 讓 iOS/Safari 觸控滑動更滑順 */
+    border-radius: 24px;
+}
+
+/* 🧪 為主容器客製化滾動條樣式，使其與 3D 科技感主題融合 */
+.app-container::-webkit-scrollbar {
+    width: 6px;
+}
+.app-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+}
+.app-container::-webkit-scrollbar-thumb {
+    background: rgba(96, 165, 250, 0.4);
+    border-radius: 10px;
+}
+.app-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(236, 72, 153, 0.6);
 }
 
 /* 現代首頁與抽卡版面 */
 .page { 
-    background: rgba(8, 14, 28, 0.65); 
+    background: rgba(8, 14, 28, 0.75); /* 微調透明度，提高文字在滾動時的閱讀性 */
     backdrop-filter: blur(16px); 
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(147, 197, 253, 0.3); 
     border-radius: 24px; 
-    padding: 35px 40px; 
+    padding: 30px 25px; /* 稍微縮小內邊距，騰出更多空間給手機顯示 */
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), inset 0 0 25px rgba(96, 165, 250, 0.15); 
     text-align: center; 
     transition: opacity 0.4s ease, transform 0.4s ease; 
@@ -223,7 +251,8 @@ button {
     backdrop-filter: none !important; 
     font-family: 'DotGothic16', monospace !important; 
     padding: 20px !important; 
-    overflow: hidden !important; 
+    /* 💡 允許內部滾動，確保在小螢幕手機上 RPG 選項不被切掉 */
+    overflow-y: auto !important; 
 }
 .retro-page * { font-family: 'DotGothic16', monospace !important; letter-spacing: 1px; }
 .retro-title { font-size: 1.25rem; color: #ffd700; margin-bottom: 12px; text-shadow: 2px 2px 0px #aa0000; }
@@ -244,7 +273,13 @@ button {
 
 .retro-system-box { background: #222; border: 2px solid #888; color: #ccc; padding: 8px 12px; width: 100%; text-align: left; margin-bottom: 10px; font-size: 0.9rem; box-shadow: inset 2px 2px 0px rgba(0,0,0,0.5); line-height: 1.4; }
 
-.retro-choices { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; width: 100% !important; }
+/* 📱 讓 8-bit 的雙選項在窄螢幕手機上自動變為「單欄」排列，防止擠壓變形 */
+.retro-choices { 
+    display: grid !important; 
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important; 
+    gap: 8px !important; 
+    width: 100% !important; 
+}
 .retro-choice-btn { background: #000; border: 2px solid #fff; color: #fff; padding: 10px 12px; font-size: 0.85rem; cursor: pointer; text-align: left; display: flex; align-items: center; transition: none; }
 .retro-choice-btn:hover { background: #fff; color: #000; }
 .retro-choice-btn::before { content: "　"; margin-right: 6px; }
@@ -283,7 +318,12 @@ button {
 .retro-portal-btn:hover { background: #00ffff; color: #000; }
 
 .retro-monument-box { background: #1a1a1a; border: 2px dashed #aaa; padding: 10px 15px; margin-bottom: 10px; }
-.retro-input-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+/* 📱 手機寬度窄時，讓「學徒代號」與「Suno 連結」改為上下單欄排列，避免擠在一起 */
+.retro-input-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+    gap: 10px; 
+}
 .retro-input { width: 100%; background: #000; border: 2px solid #fff; color: #ffd700; padding: 8px; font-size: 0.9rem; margin-top: 3px; outline: none; }
 .retro-input:focus { border-color: #ffd700; }
 
