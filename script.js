@@ -50,28 +50,23 @@ let inspirationWall = [
 
 let adventureState = { 
     moodTitle: "", 
-    vocal: "", 
-    instrument: "", 
-    tonality: "", 
-    tempo: "", 
-    step: 0, 
     solveScore: 0,
-    tags: []
+    tags: [],
+    step: 0
 };
 
 // =========================================
-// 🎓 10 主題 × 12 關專屬題庫動態產生器 (安全防崩潰、永不截斷設計)
+// 🎓 10 主題 × 12 關專屬題庫數據 (修正拼寫錯誤，保證不崩潰)
 // =========================================
 function getThemeQuestions(title) {
     const isFast = (title === "熱血運動會" || title === "闖關遊戲" || title === "快樂動物園");
     const isPlayful = (title === "遊樂園探險" || title === "生日派對");
-    const isQuiet = (title === "甜甜夢鄉" || title === "下雨的窗邊" || title === "海底世界");
     
     return [
         {
             systemText: `【第一關：音樂心跳 (速度)】閉上眼睛想像『${title}』的畫面，這首配樂的心跳節奏應該有多快？`,
             choices: [
-                { text: "🐢 散步放鬆 (慢慢的，慢板)", score: isFast ? 0.5 : 1.5, tag: "slow relaxing tempo", sound: "Slow tempo" },
+                { text: "運輸散步 (慢慢的，慢板)", score: isFast ? 0.5 : 1.5, tag: "slow relaxing tempo", sound: "Slow tempo" },
                 { text: "🚶 熱身漫步 (中等速度，行板)", score: isPlayful ? 1.5 : 1.0, tag: "moderate steady tempo, 90 bpm", sound: "Moderate tempo" },
                 { text: "🏃 活力奔馳 (非常輕快，急板)", score: isFast ? 1.5 : 0.6, tag: "upbeat fast tempo, energetic, 130 bpm", sound: "Fast tempo" }
             ]
@@ -81,7 +76,7 @@ function getThemeQuestions(title) {
             choices: [
                 { text: "🥁 一二、一二 (咚噠、咚噠，兩拍子進行曲步伐)", score: isFast ? 1.5 : 0.8, tag: "steady 2/4 marching beat", sound: "music" },
                 { text: "💃 轉圈圈 (咚噠噠、咚噠噠，三拍子圓舞曲步伐)", score: isPlayful ? 1.5 : 0.8, tag: "swaying 3/4 waltz rhythm", sound: "music" },
-                { text: "🚶 穩穩當當、最安心的 4/4 四拍子", score: isQuiet ? 1.5 : 1.0, tag: "gentle balanced 4/4 meter", sound: "music" }
+                { text: "🚶 穩穩當當、最安心的 4/4 四拍子", score: (!isFast && !isPlayful) ? 1.5 : 1.0, tag: "gentle balanced 4/4 meter", sound: "music" }
             ]
         },
         {
@@ -113,14 +108,14 @@ function getThemeQuestions(title) {
             choices: [
                 { text: "🔔 清脆明亮的高音區 (像精靈與小鳥)", score: (title === "魔法森林" || title === "快樂動物園") ? 1.5 : 1.0, tag: "sparkling high-register melodies", sound: "ice" },
                 { text: "🦁 沉重深沉的低音區 (像巨獸與引力)", score: (title === "宇宙探險" || title === "闖關遊戲") ? 1.5 : 0.8, tag: "deep resonant low-bass tones", sound: "fire" },
-                { text: "🚶 平和穩重的中音區 (像溫柔說話)", score: isQuiet ? 1.5 : 1.0, tag: "warm lyrical midrange", sound: "music" }
+                { text: "🚶 平和穩重的中音區 (像溫柔說話)", score: (!isFast && !isPlayful) ? 1.5 : 1.0, tag: "warm lyrical midrange", sound: "music" }
             ]
         },
         {
             systemText: `【第七關：靈魂法器 (主奏)】要為『${title}』選出主角音色，哪一種法器最能代表它？`,
             choices: [
                 { text: "🎺 精神奕奕的銅管樂器 (小號、法國號)", score: isFast ? 1.5 : 0.7, tag: "heroic bright brass fanfare", sound: "Brass" },
-                { text: "🎹 溫柔優雅的鍵盤法器 (鋼琴、音樂盒)", score: isQuiet ? 1.5 : 0.8, tag: "intimate warm piano and celesta", sound: "Piano" },
+                { text: "🎹 溫柔優雅的鍵盤法器 (鋼琴、音樂盒)", score: (!isFast && !isPlayful) ? 1.5 : 0.8, tag: "intimate warm piano and celesta", sound: "Piano" },
                 { text: "🌬️ 空靈清脆的木管樂器 (長笛、豎笛)", score: (title === "魔法森林" || title === "快樂動物園") ? 1.5 : 1.0, tag: "airy woodwinds and enchanting flute", sound: "Woodwinds" },
                 { text: "🎻 悠揚深情的弦樂家族 (提琴組)", score: 1.2, tag: "rich soaring strings section", sound: "Strings" }
             ]
@@ -128,7 +123,7 @@ function getThemeQuestions(title) {
         {
             systemText: `【第八關：身歷其境 (特效)】為了讓聽眾彷彿身臨其境，背景要加入哪種環境魔法聲響？`,
             choices: [
-                { text: "🍃 大自然微風、鳥鳴或溫暖雨滴聲", score: isQuiet ? 1.5 : 0.8, tag: "natural soundscape, birds, rain or wind", sound: "music" },
+                { text: "🍃 大自然微風、鳥鳴或溫暖雨滴聲", score: (!isFast && !isPlayful) ? 1.5 : 0.8, tag: "natural soundscape, birds, rain or wind", sound: "music" },
                 { text: "🗣️ 現場開心的歡呼、拍手或笑聲", score: (isPlayful || isFast) ? 1.5 : 0.8, tag: "cheerful crowd whispers, laughter and claps", sound: "music" },
                 { text: "📡 神奇的魔法閃光或電子嗶嗶聲", score: (title === "宇宙探險" || title === "闖關遊戲") ? 1.5 : 1.0, tag: "magical shimmering bells and sci-fi glimmers", sound: "ice" }
             ]
@@ -137,7 +132,7 @@ function getThemeQuestions(title) {
             systemText: `【第九關：樂器隊伍 (織體)】這場音樂冒險中，參與演奏的樂器隊伍應該有多大？`,
             choices: [
                 { text: "🏰 整個管弦樂隊齊奏的大合奏 (豐富宏大)", score: isFast ? 1.5 : 0.9, tag: "full grand orchestral tutti texture", sound: "Brass" },
-                { text: "🍃 只有兩三樣樂器輕聲細語 (乾淨清澈)", score: isQuiet ? 1.5 : 0.8, tag: "sparse minimalist delicate chamber layers", sound: "Strings" },
+                { text: "🍃 只有兩三樣樂器輕聲細語 (乾淨清澈)", score: (!isFast && !isPlayful) ? 1.5 : 0.8, tag: "sparse minimalist delicate chamber layers", sound: "Strings" },
                 { text: "🚶 單一樂器獨奏 (專注純樸)", score: 1.0, tag: "intimate solo instrument performance", sound: "Woodwinds" }
             ]
         },
@@ -146,7 +141,7 @@ function getThemeQuestions(title) {
             choices: [
                 { text: "📢 突然爆發、非常有力的強音 (突強！)", score: isFast ? 1.5 : 0.7, tag: "sudden explosive sforzando dynamics", sound: "fire" },
                 { text: "🌊 從小聲慢慢變得非常宏亮 (漸強)", score: 1.5, tag: "gradual swelling crescendo", sound: "fire" },
-                { text: "🤫 一直保持溫柔細膩的小聲 (弱音)", score: isQuiet ? 1.5 : 0.8, tag: "whisper soft gentle dynamics", sound: "Slow tempo" }
+                { text: "🤫 一直保持溫柔細膩的小聲 (弱音)", score: (!isFast) ? 1.5 : 0.8, tag: "whisper soft gentle dynamics", sound: "Slow tempo" }
             ]
         },
         {
@@ -161,7 +156,7 @@ function getThemeQuestions(title) {
             systemText: `【第十二關：圓滿落幕 (結尾)】冒險即將結束，這首專屬配樂要如何謝幕？`,
             choices: [
                 { text: "🥁 伴隨定音鼓震撼俐落地結束！", score: isFast ? 1.5 : 0.9, tag: "grand definitive final cadence strike", sound: "fire" },
-                { text: "🚂 像火車開遠一樣，慢慢消失在空氣中 (淡出)", score: isQuiet ? 1.5 : 1.0, tag: "peaceful slow fade-out to silence", sound: "Slow tempo" },
+                { text: "🚂 像火車開遠一樣，慢慢消失在空氣中 (淡出)", score: (!isFast) ? 1.5 : 1.0, tag: "peaceful slow fade-out to silence", sound: "Slow tempo" },
                 { text: "✨ 停留在一個晶瑩剔透的和弦餘音上", score: (title === "魔法森林" || title === "宇宙探險" || title === "下雨的窗邊") ? 1.5 : 1.0, tag: "lingering sparkling final sustained chord", sound: "ice" }
             ]
         }
@@ -195,23 +190,41 @@ function showPage(pageToShow) {
     }
 }
 
-// 🌟 開始體驗按鈕：100% 解鎖點擊事件
+// 🎵 核心安全播放音樂函數 (包含自動恢復機制)
+function tryPlayBackgroundMusic() {
+    if (!bgMusic) return;
+    bgMusic.volume = 0.5;
+    
+    // 強制嘗試在最具有信任度的用戶 gesture 事件中播放
+    bgMusic.play()
+        .then(() => {
+            isMusicPlaying = true;
+            if (musicToggle) musicToggle.innerText = "🔊";
+            console.log("背景音樂成功解鎖自動播放！");
+        })
+        .catch((err) => {
+            console.log("瀏覽器阻擋了音樂自動播放，已安全掛起，等待用戶點擊任何地方解鎖：", err);
+            isMusicPlaying = false;
+            if (musicToggle) musicToggle.innerText = "🔇";
+            
+            // 🌟 註冊全網頁一次性解鎖點擊：當學生點擊網頁任何地方時，自動啟動音樂
+            const unlockAudio = () => {
+                bgMusic.play().then(() => {
+                    isMusicPlaying = true;
+                    if (musicToggle) musicToggle.innerText = "🔊";
+                    document.removeEventListener('click', unlockAudio);
+                }).catch(()=>{});
+            };
+            document.addEventListener('click', unlockAudio);
+        });
+}
+
+// 🌟 開始體驗按鈕 (點擊解鎖音訊並進入抽卡)
 if (startBtn) {
     startBtn.onclick = function() {
-        initAudio(); 
+        initAudio(); // 優先激活 Web Audio API 脈搏
         showPage(pageCard);
-        if (bgMusic) { 
-            bgMusic.volume = 0.5; 
-            bgMusic.play()
-                .then(() => { 
-                    isMusicPlaying = true; 
-                    if (musicToggle) musicToggle.innerText = "🔊"; 
-                })
-                .catch(() => {
-                    isMusicPlaying = false;
-                    if (musicToggle) musicToggle.innerText = "🔇";
-                });
-        }
+        tryPlayBackgroundMusic(); // 用最高優先級去嘗試播放音樂
     };
 }
 
@@ -224,8 +237,9 @@ if (musicToggle) {
             bgMusic.pause(); 
             musicToggle.innerText = "🔇"; 
         } else { 
-            bgMusic.play(); 
-            musicToggle.innerText = "🔊"; 
+            bgMusic.play().then(() => {
+                musicToggle.innerText = "🔊"; 
+            }).catch(()=>{}); 
         }
         isMusicPlaying = !isMusicPlaying;
     };
@@ -258,12 +272,13 @@ deckCards.forEach(card => {
     };
 });
 
+// 🌟 進入魔法公會按鈕 (修復崩潰衝突)
 if (startAdventureBtn) {
     startAdventureBtn.onclick = function() {
         initAudio(); 
         if (ffCanvasContainer) ffCanvasContainer.style.opacity = "0"; 
         showPage(page2); 
-        renderRPGStep(0); 
+        renderRPGStep(0); // 確保執行 100% 正確的題庫
     };
 }
 
@@ -421,6 +436,7 @@ if (nextToPage4Btn) {
 // =========================================
 // 🧪 打字機與 12 題大冒險動態渲染系統
 // =========================================
+let typingInterval;
 function renderRPGStep(stepIndex) {
     adventureState.step = stepIndex;
     const currentQuestions = getThemeQuestions(adventureState.moodTitle);
@@ -470,39 +486,183 @@ function renderRPGStep(stepIndex) {
     }
 }
 
-// =========================================
-// 🎵 Web Audio API 音效引擎
-// =========================================
-let audioCtx;
-function initAudio() {
-    try {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-    } catch(e) {}
+function triggerEvaluationReveal() {
+    if (ffCanvasContainer) ffCanvasContainer.style.opacity = "0"; 
+    
+    if (appContainer) {
+        appContainer.classList.add('screen-shake');
+        setTimeout(() => appContainer.classList.remove('screen-shake'), 600);
+    }
+    playRitualFanfare();
+
+    const finalGrade = calculateFinalGrade(adventureState.solveScore);
+    const scoreEl = document.getElementById('problemSolvingScore');
+    if (scoreEl) scoreEl.innerText = `${finalGrade} / 5 分`;
+    showPage(page3); 
+    
+    let evalDialogue = "";
+    if (finalGrade === 5) {
+        evalDialogue = `「太不可思議了！你的『探究解難能力』獲得了【5分】滿分！你精準地掌控了所有的音樂元素，簡直是百年一遇的配樂天才！」`;
+    } else if (finalGrade === 4) {
+        evalDialogue = `「非常好！你獲得了【4分】。你對節奏、音色與調性有非常出色的理解，翁 sir 為你感到驕傲！」`;
+    } else if (finalGrade === 3) {
+        evalDialogue = `「恭喜通關！你獲得了【3分】。你已經基本掌握了這首配樂的關鍵要素，快去生成你的歌曲吧！」`;
+    } else if (finalGrade === 2) {
+        evalDialogue = `「加油！你獲得了【2分】。你基本完成了挑戰，但如果能多留意一下音量和樂器對比，魔法能量會更強喔！」`;
+    } else {
+        evalDialogue = `「別氣餒！你獲得了【1分】。這是一段很好的樂理探究旅程，翁 sir 鼓勵你等一下再挑戰一次！」`;
+    }
+
+    const evalTextEl = document.getElementById('evalTutorText');
+    if (evalTextEl) typeWriterEffect(evalTextEl, evalDialogue, 30);
 }
 
-// =========================================
+// 🔮 非同步向 Google 試算表拉取最新數據
+async function fetchWallData() {
+    const wall = document.getElementById('wallContainer');
+    if (!wall) return;
+    wall.innerHTML = "<p style='color:#38bdf8; grid-column: 1/-1;'>正在感應靈感石碑的共鳴...</p>";
+    try {
+        const res = await fetch(GAS_API_URL);
+        const data = await res.json();
+        inspirationWall = data;
+        renderWall();
+    } catch(err) {
+        wall.innerHTML = "<p style='color:#f87171; grid-column: 1/-1;'>未能與雲端同步，改為讀取備用數據中...</p>";
+        setTimeout(() => {
+            renderWall();
+        }, 1000);
+    }
+}
+
+// 🎨 渲染靈感牆
+function renderWall() {
+    const wall = document.getElementById('wallContainer');
+    if (!wall) return;
+    wall.innerHTML = "";
+    
+    if (inspirationWall.length === 0) {
+        wall.innerHTML = "<p style='color:#94a3b8; grid-column: 1/-1;'>石碑上尚未刻入任何咒語，成為第一位魔法音樂學徒吧！</p>";
+        return;
+    }
+    [...inspirationWall].reverse().forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = "wall-item";
+        card.innerHTML = `
+            <h4>${item.name} 的作品</h4>
+            <p class="wall-mood">🔮主題：${item.mood}</p>
+            <div style="font-size: 0.8rem; background: rgba(0,0,0,0.4); padding: 8px; border-radius: 6px; margin-bottom: 12px; text-align: left; border-left: 3px solid #00ffff;">
+                <p style="margin-bottom:0; color: #e0f2fe;">🔍 探究解難能力: ${item.solveScore} / 5 分</p>
+            </div>
+            <div class="qr-wrapper"><canvas id="qr-${index}" class="qr-canvas"></canvas></div>
+            <p style="font-size: 0.8rem; margin-top: 5px;">
+                <a href="${item.url}" target="_blank" style="color: #a855f7; text-decoration: underline; font-weight: bold;">
+                    📱 點擊或掃描聽音樂
+                </a>
+            </p>
+        `;
+        wall.appendChild(card);
+        setTimeout(() => {
+            try {
+                new QRious({ element: document.getElementById(`qr-${index}`), value: item.url, size: 250, background: '#ffffff', foreground: '#000000', level: 'M' });
+            } catch(e){}
+        }, 10);
+    });
+}
+
+function resetApp() {
+    if (ffCanvasContainer) ffCanvasContainer.style.opacity = "1"; 
+    adventureState = { moodTitle: "", vocal: "", instrument: "", tonality: "", tempo: "", step: 0, solveScore: 0, tags: [] };
+    
+    if (moodCard) moodCard.classList.remove('flipped');
+    if (reDrawBtn) reDrawBtn.classList.add('hidden-btn');
+    if (startAdventureBtn) startAdventureBtn.classList.add('hidden-btn');
+    if (singleCardArea) singleCardArea.classList.add('hidden-area');
+    if (deckArea) deckArea.classList.remove('hidden-area');
+    
+    clearInterval(typingInterval);
+    if (!isMusicPlaying && bgMusic) { 
+        bgMusic.volume = 0.5; 
+        bgMusic.play().then(() => { 
+            isMusicPlaying = true; 
+            if (musicToggle) musicToggle.innerText = "🔊"; 
+        }).catch(()=>{}); 
+    }
+    showPage(page1);
+}
+
+let idleTime = 0;
+setInterval(() => { idleTime++; if (idleTime >= 120 && page1 && page1.classList.contains('hidden')) resetApp(); }, 1000);
+['mousemove', 'mousedown', 'keypress', 'touchstart'].forEach(evt => document.addEventListener(evt, () => idleTime = 0, false));
+
+// =================================================================
+// 🔊 8-bit 合成器音效調用
+// =================================================================
+function playRitualFanfare() {
+    if (!audioCtx || !isMusicPlaying) return;
+    try {
+        const now = audioCtx.currentTime;
+        function playNote(freq, start, duration) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0, start);
+            gain.gain.linearRampToValueAtTime(0.12, start + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(start); osc.stop(start + duration);
+        }
+        playNote(523.25, now, 0.4);
+        playNote(659.25, now + 0.15, 0.4);
+        playNote(783.99, now + 0.3, 0.4);
+        playNote(987.77, now + 0.45, 0.5);
+        playNote(1046.50, now + 0.65, 1.2);
+    } catch(e){}
+}
+
+function playSpellSound(type) {
+    if (!audioCtx || !isMusicPlaying) return;
+    try {
+        const now = audioCtx.currentTime;
+        function playTone(freq, waveType, startTime, duration, vol=0.1) {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.type = waveType;
+            o.frequency.value = freq;
+            g.gain.setValueAtTime(0, startTime);
+            g.gain.linearRampToValueAtTime(vol, startTime + duration * 0.1);
+            g.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+            o.connect(g); g.connect(audioCtx.destination);
+            o.start(startTime); o.stop(startTime + duration);
+        }
+        switch (type) {
+            case 'Strings': playTone(440, 'sawtooth', now, 1.2, 0.05); playTone(659.25, 'sawtooth', now, 1.2, 0.05); break;
+            case 'Woodwinds': playTone(1046.50, 'sine', now, 0.8, 0.1); break;
+            case 'Brass': playTone(466.16, 'square', now, 0.6, 0.03); playTone(698.46, 'square', now+0.15, 0.6, 0.03); break;
+            case 'Piano': 
+                playTone(523.25, 'triangle', now, 0.4, 0.1); playTone(659.25, 'triangle', now+0.1, 0.4, 0.1);
+                playTone(783.99, 'triangle', now+0.2, 0.4, 0.1); playTone(1046.50, 'triangle', now+0.3, 0.8, 0.1);
+                break;
+            case 'Major Key': playTone(523.25, 'triangle', now, 0.8, 0.1); playTone(659.25, 'triangle', now, 0.8, 0.1); playTone(783.99, 'triangle', now, 0.8, 0.1); break;
+            case 'Minor Key': playTone(440, 'triangle', now, 0.8, 0.1); playTone(523.25, 'triangle', now, 0.8, 0.1); playTone(659.25, 'triangle', now, 0.8, 0.1); break;
+            case 'Pentatonic': [523.25, 587.33, 659.25, 783.99, 880].forEach((f, i) => playTone(f, 'sine', now + i*0.12, 0.4, 0.08)); break;
+            case 'Slow tempo': playTone(800, 'square', now, 0.08, 0.02); playTone(800, 'square', now+0.5, 0.08, 0.02); break;
+            case 'Moderate tempo': playTone(800, 'square', now, 0.08, 0.02); playTone(800, 'square', now+0.25, 0.08, 0.02); break;
+            case 'Fast tempo': playTone(800, 'square', now, 0.08, 0.02); playTone(800, 'square', now+0.12, 0.08, 0.02); break;
+            case 'fire': playTone(150, 'sawtooth', now, 0.8, 0.1); break;
+            case 'ice': playTone(1200, 'sine', now, 0.4, 0.1); break;
+            case 'music': playTone(659.25, 'triangle', now, 0.8, 0.1); break;
+        }
+    } catch(e){}
+}
+
+// =================================================================
 // 🌌 Final Fantasy 3D 水晶星空背景引擎 (Three.js)
-// =========================================
+// =================================================================
 let scene, camera, renderer, crystalMesh, outerRingsGroup, starField, waveMesh;
 let mouseX = 0, mouseY = 0;
 let targetCameraX = 0, targetCameraY = 0;
-
-function createGlowPointTexture() {
-    try {
-        const canvas = document.createElement('canvas');
-        canvas.width = 64; canvas.height = 64;
-        const ctx = canvas.getContext('2d');
-        const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
-        gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-        gradient.addColorStop(0.3, 'rgba(147, 197, 253, 0.9)');
-        gradient.addColorStop(0.7, 'rgba(168, 85, 247, 0.4)');
-        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, 64, 64);
-        return new THREE.CanvasTexture(canvas);
-    } catch(e) { return null; }
-}
 
 function initFF3DBackground() {
     try {
