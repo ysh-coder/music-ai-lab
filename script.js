@@ -56,7 +56,7 @@ let adventureState = {
 };
 
 // =========================================
-// 🎓 10 主題 × 12 關專屬題庫數據 (修正拼寫錯誤，保證不崩潰)
+// 🎓 10 主題 × 12 關專屬題庫數據 (100% 正確版)
 // =========================================
 function getThemeQuestions(title) {
     const isFast = (title === "熱血運動會" || title === "闖關遊戲" || title === "快樂動物園");
@@ -112,7 +112,7 @@ function getThemeQuestions(title) {
             ]
         },
         {
-            systemText: `【第七關：靈魂法器 (主奏)】要為『${title}』選出主角音色，哪一種法器最能代表它？`,
+            systemText: `【第七關：靈魂法器 (主奏)】要為『${title}』選出主角音色，哪種法器最能代表它？`,
             choices: [
                 { text: "🎺 精神奕奕的銅管樂器 (小號、法國號)", score: isFast ? 1.5 : 0.7, tag: "heroic bright brass fanfare", sound: "Brass" },
                 { text: "🎹 溫柔優雅的鍵盤法器 (鋼琴、音樂盒)", score: (!isFast && !isPlayful) ? 1.5 : 0.8, tag: "intimate warm piano and celesta", sound: "Piano" },
@@ -195,7 +195,6 @@ function tryPlayBackgroundMusic() {
     if (!bgMusic) return;
     bgMusic.volume = 0.5;
     
-    // 強制嘗試在最具有信任度的用戶 gesture 事件中播放
     bgMusic.play()
         .then(() => {
             isMusicPlaying = true;
@@ -203,11 +202,10 @@ function tryPlayBackgroundMusic() {
             console.log("背景音樂成功解鎖自動播放！");
         })
         .catch((err) => {
-            console.log("瀏覽器阻擋了音樂自動播放，已安全掛起，等待用戶點擊任何地方解鎖：", err);
+            console.log("瀏覽器阻擋了音樂自動播放，已安全掛起，等待用戶點擊解鎖：", err);
             isMusicPlaying = false;
             if (musicToggle) musicToggle.innerText = "🔇";
             
-            // 🌟 註冊全網頁一次性解鎖點擊：當學生點擊網頁任何地方時，自動啟動音樂
             const unlockAudio = () => {
                 bgMusic.play().then(() => {
                     isMusicPlaying = true;
@@ -437,6 +435,30 @@ if (nextToPage4Btn) {
 // 🧪 打字機與 12 題大冒險動態渲染系統
 // =========================================
 let typingInterval;
+function typeWriterEffect(element, htmlString, speed, onComplete, isSystem = false) {
+    clearInterval(typingInterval); 
+    if (!element) return;
+    element.innerHTML = ''; 
+    element.classList.add('typing-cursor'); 
+    let i = 0;
+    typingInterval = setInterval(() => {
+        if (i < htmlString.length) {
+            if (htmlString.charAt(i) === '<') {
+                let tagEnd = htmlString.indexOf('>', i);
+                if (tagEnd !== -1) { element.innerHTML += htmlString.substring(i, tagEnd + 1); i = tagEnd + 1; return; }
+            }
+            const char = htmlString.charAt(i);
+            element.innerHTML += char;
+            if (char !== ' ' && char !== '　' && char !== '\n') playTextBleep(isSystem);
+            i++;
+        } else {
+            clearInterval(typingInterval); 
+            element.classList.remove('typing-cursor'); 
+            if (onComplete) onComplete();
+        }
+    }, speed);
+}
+
 function renderRPGStep(stepIndex) {
     adventureState.step = stepIndex;
     const currentQuestions = getThemeQuestions(adventureState.moodTitle);
