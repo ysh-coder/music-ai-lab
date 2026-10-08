@@ -193,17 +193,31 @@ function showPage(pageToShow) {
     }
 }
 
-// 綁定「開始體驗」按鈕
+// 🌟 關鍵修復：異步解鎖音訊，確保音樂即使被阻擋，按鈕也絕對能正常啟動
 if (startBtn) {
     startBtn.addEventListener('click', () => {
-        initAudio(); 
+        // 100% 優先切換頁面
         showPage(pageCard);
-        if (!isMusicPlaying && bgMusic) { 
-            bgMusic.volume = 0.5; 
-            bgMusic.play().then(() => { 
-                isMusicPlaying = true; 
-                if (musicToggle) musicToggle.innerText = "🔊"; 
-            }).catch(()=>{}); 
+        
+        // 後台嘗試安全初始化音訊
+        try {
+            initAudio(); 
+            if (bgMusic) {
+                bgMusic.volume = 0.5; 
+                bgMusic.play()
+                    .then(() => { 
+                        isMusicPlaying = true; 
+                        if (musicToggle) musicToggle.innerText = "🔊"; 
+                    })
+                    .catch((err) => {
+                        console.log("背景音樂自動播放受限，等待用戶手動啟用：", err);
+                        // 受限時保持靜音狀態，不卡死主頁按鈕
+                        isMusicPlaying = false;
+                        if (musicToggle) musicToggle.innerText = "🔇";
+                    });
+            }
+        } catch (e) {
+            console.log("音訊引擎啟動受限：", e);
         }
     });
 }
@@ -212,9 +226,17 @@ if (startBtn) {
 if (musicToggle) {
     musicToggle.addEventListener('click', () => {
         if (!bgMusic) return;
-        if (isMusicPlaying) { bgMusic.pause(); musicToggle.innerText = "🔇"; } 
-        else { bgMusic.play(); musicToggle.innerText = "🔊"; }
-        isMusicPlaying = !isMusicPlaying;
+        try {
+            initAudio();
+            if (isMusicPlaying) { 
+                bgMusic.pause(); 
+                musicToggle.innerText = "🔇"; 
+            } else { 
+                bgMusic.play(); 
+                musicToggle.innerText = "🔊"; 
+            }
+            isMusicPlaying = !isMusicPlaying;
+        } catch (e) {}
     });
 }
 
@@ -498,7 +520,7 @@ function triggerEvaluationReveal() {
     
     let evalDialogue = "";
     if (finalGrade === 5) {
-        evalDialogue = `「太不可思議了！你的『探究解難能力』獲得了【5分】滿分！你精準地掌控了所有的音樂元素，簡真是百年一遇的配樂天才！」`;
+        evalDialogue = `「太不可思議了！你的『探究解難能力』獲得了【5分】滿分！你精準地掌控了所有的音樂元素，簡直是百年一遇的配樂天才！」`;
     } else if (finalGrade === 4) {
         evalDialogue = `「非常好！你獲得了【4分】。你對節奏、音色與調性有非常出色的理解，翁 sir 為你感到驕傲！」`;
     } else if (finalGrade === 3) {
