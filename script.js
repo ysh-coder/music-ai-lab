@@ -56,11 +56,11 @@ let adventureState = {
     tempo: "", 
     step: 0, 
     solveScore: 0,
-    tags: [] // 儲存 12 題選擇產生的 Suno 關鍵字
+    tags: []
 };
 
 // =========================================
-// 🎓 10 主題 × 12 關專屬題庫動態產生器 (安全防崩潰設計)
+// 🎓 10 主題 × 12 關專屬題庫動態產生器 (安全防崩潰、永不截斷設計)
 // =========================================
 function getThemeQuestions(title) {
     const isFast = (title === "熱血運動會" || title === "闖關遊戲" || title === "快樂動物園");
@@ -189,60 +189,51 @@ function showPage(pageToShow) {
         if (pageToShow === page5 && isMusicPlaying) {
             bgMusic.pause(); musicToggle.innerText = "🔇"; isMusicPlaying = false; 
         }
-        requestAnimationFrame(() => setTimeout(() => pageToShow.classList.add('active'), 10));
+        requestAnimationFrame(() => {
+            setTimeout(() => pageToShow.classList.add('active'), 10);
+        });
     }
 }
 
-// 🌟 關鍵修復：異步解鎖音訊，確保音樂即使被阻擋，按鈕也絕對能正常啟動
+// 🌟 開始體驗按鈕：100% 解鎖點擊事件
 if (startBtn) {
-    startBtn.addEventListener('click', () => {
-        // 100% 優先切換頁面
+    startBtn.onclick = function() {
+        initAudio(); 
         showPage(pageCard);
-        
-        // 後台嘗試安全初始化音訊
-        try {
-            initAudio(); 
-            if (bgMusic) {
-                bgMusic.volume = 0.5; 
-                bgMusic.play()
-                    .then(() => { 
-                        isMusicPlaying = true; 
-                        if (musicToggle) musicToggle.innerText = "🔊"; 
-                    })
-                    .catch((err) => {
-                        console.log("背景音樂自動播放受限，等待用戶手動啟用：", err);
-                        // 受限時保持靜音狀態，不卡死主頁按鈕
-                        isMusicPlaying = false;
-                        if (musicToggle) musicToggle.innerText = "🔇";
-                    });
-            }
-        } catch (e) {
-            console.log("音訊引擎啟動受限：", e);
+        if (bgMusic) { 
+            bgMusic.volume = 0.5; 
+            bgMusic.play()
+                .then(() => { 
+                    isMusicPlaying = true; 
+                    if (musicToggle) musicToggle.innerText = "🔊"; 
+                })
+                .catch(() => {
+                    isMusicPlaying = false;
+                    if (musicToggle) musicToggle.innerText = "🔇";
+                });
         }
-    });
+    };
 }
 
 // 音樂開關
 if (musicToggle) {
-    musicToggle.addEventListener('click', () => {
+    musicToggle.onclick = function() {
         if (!bgMusic) return;
-        try {
-            initAudio();
-            if (isMusicPlaying) { 
-                bgMusic.pause(); 
-                musicToggle.innerText = "🔇"; 
-            } else { 
-                bgMusic.play(); 
-                musicToggle.innerText = "🔊"; 
-            }
-            isMusicPlaying = !isMusicPlaying;
-        } catch (e) {}
-    });
+        initAudio();
+        if (isMusicPlaying) { 
+            bgMusic.pause(); 
+            musicToggle.innerText = "🔇"; 
+        } else { 
+            bgMusic.play(); 
+            musicToggle.innerText = "🔊"; 
+        }
+        isMusicPlaying = !isMusicPlaying;
+    };
 }
 
 // 抽卡點擊
 deckCards.forEach(card => {
-    card.addEventListener('click', () => {
+    card.onclick = function() {
         const selectedMood = moodDatabase[Math.floor(Math.random() * moodDatabase.length)];
         
         if (moodCard) moodCard.classList.remove('flipped');
@@ -264,33 +255,33 @@ deckCards.forEach(card => {
                 if (startAdventureBtn) startAdventureBtn.classList.remove('hidden-btn'); 
             }, 800);
         }, 250);
-    });
+    };
 });
 
 if (startAdventureBtn) {
-    startAdventureBtn.addEventListener('click', () => {
+    startAdventureBtn.onclick = function() {
         initAudio(); 
         if (ffCanvasContainer) ffCanvasContainer.style.opacity = "0"; 
         showPage(page2); 
         renderRPGStep(0); 
-    });
+    };
 }
 
 const copyPromptBtn = document.getElementById('copyPromptBtn');
 if (copyPromptBtn) {
-    copyPromptBtn.addEventListener('click', () => {
+    copyPromptBtn.onclick = function() {
         const promptEl = document.getElementById('resultPrompt');
         if (promptEl) {
             navigator.clipboard.writeText(promptEl.innerText);
             copyPromptBtn.innerText = "✅ 抄寫成功！";
             setTimeout(() => copyPromptBtn.innerText = "📋 抄寫咒語 (複製)", 2000);
         }
-    });
+    };
 }
 
 const quickPasteBtn = document.getElementById('quickPasteBtn');
 if (quickPasteBtn) {
-    quickPasteBtn.addEventListener('click', async () => {
+    quickPasteBtn.onclick = async function() {
         try {
             const text = await navigator.clipboard.readText();
             if (text && text.startsWith("http")) {
@@ -310,12 +301,12 @@ if (quickPasteBtn) {
             quickPasteBtn.style.borderColor = "#4ade80";
             quickPasteBtn.style.color = "#4ade80";
         }
-    });
+    };
 }
 
 const uploadWallBtn = document.getElementById('uploadWallBtn');
 if (uploadWallBtn) {
-    uploadWallBtn.addEventListener('click', async () => {
+    uploadWallBtn.onclick = async function() {
         const nameInput = document.getElementById('authorName');
         const urlInput = document.getElementById('sunoUrlInput');
         const name = nameInput ? nameInput.value.trim() : "";
@@ -378,11 +369,11 @@ if (uploadWallBtn) {
             uploadWallBtn.disabled = false;
             uploadWallBtn.innerText = "🔮 刻入魔法石碑 (生成二維碼)";
         }
-    });
+    };
 }
 
 if (reDrawBtn) {
-    reDrawBtn.addEventListener('click', () => {
+    reDrawBtn.onclick = function() {
         if (moodCard) moodCard.classList.remove('flipped');
         reDrawBtn.classList.add('hidden-btn');
         if (startAdventureBtn) startAdventureBtn.classList.add('hidden-btn');
@@ -393,29 +384,29 @@ if (reDrawBtn) {
             if (moodTitle) moodTitle.innerText = "";
             if (moodDesc) moodDesc.innerText = "";
         }, 400); 
-    });
+    };
 }
 
 const viewWallBtn = document.getElementById('viewWallBtn');
 if (viewWallBtn) {
-    viewWallBtn.addEventListener('click', async () => { 
+    viewWallBtn.onclick = async function() { 
         if (ffCanvasContainer) ffCanvasContainer.style.opacity = "1"; 
         await fetchWallData(); 
         showPage(page5); 
-    });
+    };
 }
 
 const backToHomeBtn = document.getElementById('backToHomeBtn');
-if (backToHomeBtn) backToHomeBtn.addEventListener('click', resetApp);
+if (backToHomeBtn) backToHomeBtn.onclick = resetApp;
 const cancelToHomeBtn = document.getElementById('cancelToHomeBtn');
-if (cancelToHomeBtn) cancelToHomeBtn.addEventListener('click', resetApp);
+if (cancelToHomeBtn) cancelToHomeBtn.onclick = resetApp;
 const cancelToPage3Btn = document.getElementById('cancelToPage3Btn');
-if (cancelToPage3Btn) cancelToPage3Btn.addEventListener('click', () => showPage(page3));
+if (cancelToPage3Btn) cancelToPage3Btn.onclick = () => showPage(page3);
 const restartAdventureBtn = document.getElementById('restartAdventureBtn');
-if (restartAdventureBtn) restartAdventureBtn.addEventListener('click', resetApp);
+if (restartAdventureBtn) restartAdventureBtn.onclick = resetApp;
 
 if (nextToPage4Btn) {
-    nextToPage4Btn.addEventListener('click', () => {
+    nextToPage4Btn.onclick = function() {
         const promptText = `A high quality music track for ${adventureState.moodTitle}, ${adventureState.tags.join(', ')}. Perfect cinematic background composition.`;
         const promptEl = document.getElementById('resultPrompt');
         if (promptEl) promptEl.innerText = promptText;
@@ -424,37 +415,12 @@ if (nextToPage4Btn) {
         const ritualDialogue = `「現在，將你調配出的這段咒語帶去 Suno AI 聖地吧。生成音樂後，別忘了回來把它刻在靈感石碑上！」`;
         const ritualTextEl = document.getElementById('ritualText');
         if (ritualTextEl) typeWriterEffect(ritualTextEl, ritualDialogue, 30);
-    });
+    };
 }
 
 // =========================================
 // 🧪 打字機與 12 題大冒險動態渲染系統
 // =========================================
-let typingInterval;
-function typeWriterEffect(element, htmlString, speed, onComplete, isSystem = false) {
-    clearInterval(typingInterval); 
-    if (!element) return;
-    element.innerHTML = ''; 
-    element.classList.add('typing-cursor'); 
-    let i = 0;
-    typingInterval = setInterval(() => {
-        if (i < htmlString.length) {
-            if (htmlString.charAt(i) === '<') {
-                let tagEnd = htmlString.indexOf('>', i);
-                if (tagEnd !== -1) { element.innerHTML += htmlString.substring(i, tagEnd + 1); i = tagEnd + 1; return; }
-            }
-            const char = htmlString.charAt(i);
-            element.innerHTML += char;
-            if (char !== ' ' && char !== '　' && char !== '\n') playTextBleep(isSystem);
-            i++;
-        } else {
-            clearInterval(typingInterval); 
-            element.classList.remove('typing-cursor'); 
-            if (onComplete) onComplete();
-        }
-    }, speed);
-}
-
 function renderRPGStep(stepIndex) {
     adventureState.step = stepIndex;
     const currentQuestions = getThemeQuestions(adventureState.moodTitle);
@@ -478,7 +444,7 @@ function renderRPGStep(stepIndex) {
             const btn = document.createElement('button'); 
             btn.className = 'retro-choice-btn'; 
             btn.innerHTML = choice.text;
-            btn.addEventListener('click', () => {
+            btn.onclick = function() {
                 adventureState.solveScore += choice.score;
                 adventureState.tags.push(choice.tag);
                 
@@ -489,7 +455,7 @@ function renderRPGStep(stepIndex) {
                 } else {
                     renderRPGStep(stepIndex + 1);
                 }
-            });
+            };
             choicesContainer.appendChild(btn);
         });
         choicesContainer.style.display = 'grid'; 
@@ -504,118 +470,20 @@ function renderRPGStep(stepIndex) {
     }
 }
 
-function triggerEvaluationReveal() {
-    if (ffCanvasContainer) ffCanvasContainer.style.opacity = "0"; 
-    
-    if (appContainer) {
-        appContainer.classList.add('screen-shake');
-        setTimeout(() => appContainer.classList.remove('screen-shake'), 600);
-    }
-    playRitualFanfare();
-
-    const finalGrade = calculateFinalGrade(adventureState.solveScore);
-    const scoreEl = document.getElementById('problemSolvingScore');
-    if (scoreEl) scoreEl.innerText = `${finalGrade} / 5 分`;
-    showPage(page3); 
-    
-    let evalDialogue = "";
-    if (finalGrade === 5) {
-        evalDialogue = `「太不可思議了！你的『探究解難能力』獲得了【5分】滿分！你精準地掌控了所有的音樂元素，簡直是百年一遇的配樂天才！」`;
-    } else if (finalGrade === 4) {
-        evalDialogue = `「非常好！你獲得了【4分】。你對節奏、音色與調性有非常出色的理解，翁 sir 為你感到驕傲！」`;
-    } else if (finalGrade === 3) {
-        evalDialogue = `「恭喜通關！你獲得了【3分】。你已經基本掌握了這首配樂的關鍵要素，快去生成你的歌曲吧！」`;
-    } else if (finalGrade === 2) {
-        evalDialogue = `「加油！你獲得了【2分】。你基本完成了挑戰，但如果能多留意一下音量和樂器對比，魔法能量會更強喔！」`;
-    } else {
-        evalDialogue = `「別氣餒！你獲得了【1分】。這是一段很好的樂理探究旅程，翁 sir 鼓勵你等一下再挑戰一次！」`;
-    }
-
-    const evalTextEl = document.getElementById('evalTutorText');
-    if (evalTextEl) typeWriterEffect(evalTextEl, evalDialogue, 30);
-}
-
-// 🔮 非同步向 Google 試算表拉取最新數據
-async function fetchWallData() {
-    const wall = document.getElementById('wallContainer');
-    if (!wall) return;
-    wall.innerHTML = "<p style='color:#38bdf8; grid-column: 1/-1;'>正在感應靈感石碑的共鳴...</p>";
+// =========================================
+// 🎵 Web Audio API 音效引擎
+// =========================================
+let audioCtx;
+function initAudio() {
     try {
-        const res = await fetch(GAS_API_URL);
-        const data = await res.json();
-        inspirationWall = data;
-        renderWall();
-    } catch(err) {
-        wall.innerHTML = "<p style='color:#f87171; grid-column: 1/-1;'>未能與雲端同步，改為讀取備用數據中...</p>";
-        setTimeout(() => {
-            renderWall();
-        }, 1000);
-    }
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+    } catch(e) {}
 }
 
-// 🎨 渲染靈感牆
-function renderWall() {
-    const wall = document.getElementById('wallContainer');
-    if (!wall) return;
-    wall.innerHTML = "";
-    
-    if (inspirationWall.length === 0) {
-        wall.innerHTML = "<p style='color:#94a3b8; grid-column: 1/-1;'>石碑上尚未刻入任何咒語，成為第一位魔法音樂學徒吧！</p>";
-        return;
-    }
-    [...inspirationWall].reverse().forEach((item, index) => {
-        const card = document.createElement('div');
-        card.className = "wall-item";
-        card.innerHTML = `
-            <h4>${item.name} 的作品</h4>
-            <p class="wall-mood">🔮主題：${item.mood}</p>
-            <div style="font-size: 0.8rem; background: rgba(0,0,0,0.4); padding: 8px; border-radius: 6px; margin-bottom: 12px; text-align: left; border-left: 3px solid #00ffff;">
-                <p style="margin-bottom:0; color: #e0f2fe;">🔍 探究解難能力: ${item.solveScore} / 5 分</p>
-            </div>
-            <div class="qr-wrapper"><canvas id="qr-${index}" class="qr-canvas"></canvas></div>
-            <p style="font-size: 0.8rem; margin-top: 5px;">
-                <a href="${item.url}" target="_blank" style="color: #a855f7; text-decoration: underline; font-weight: bold;">
-                    📱 點擊或掃描聽音樂
-                </a>
-            </p>
-        `;
-        wall.appendChild(card);
-        setTimeout(() => {
-            try {
-                new QRious({ element: document.getElementById(`qr-${index}`), value: item.url, size: 250, background: '#ffffff', foreground: '#000000', level: 'M' });
-            } catch(e){}
-        }, 10);
-    });
-}
-
-function resetApp() {
-    if (ffCanvasContainer) ffCanvasContainer.style.opacity = "1"; 
-    adventureState = { moodTitle: "", vocal: "", instrument: "", tonality: "", tempo: "", step: 0, solveScore: 0, tags: [] };
-    
-    if (moodCard) moodCard.classList.remove('flipped');
-    if (reDrawBtn) reDrawBtn.classList.add('hidden-btn');
-    if (startAdventureBtn) startAdventureBtn.classList.add('hidden-btn');
-    if (singleCardArea) singleCardArea.classList.add('hidden-area');
-    if (deckArea) deckArea.classList.remove('hidden-area');
-    
-    clearInterval(typingInterval);
-    if (!isMusicPlaying && bgMusic) { 
-        bgMusic.volume = 0.5; 
-        bgMusic.play().then(() => { 
-            isMusicPlaying = true; 
-            if (musicToggle) musicToggle.innerText = "🔊"; 
-        }).catch(()=>{}); 
-    }
-    showPage(page1);
-}
-
-let idleTime = 0;
-setInterval(() => { idleTime++; if (idleTime >= 120 && page1 && page1.classList.contains('hidden')) resetApp(); }, 1000);
-['mousemove', 'mousedown', 'keypress', 'touchstart'].forEach(evt => document.addEventListener(evt, () => idleTime = 0, false));
-
-// =================================================================
+// =========================================
 // 🌌 Final Fantasy 3D 水晶星空背景引擎 (Three.js)
-// =================================================================
+// =========================================
 let scene, camera, renderer, crystalMesh, outerRingsGroup, starField, waveMesh;
 let mouseX = 0, mouseY = 0;
 let targetCameraX = 0, targetCameraY = 0;
