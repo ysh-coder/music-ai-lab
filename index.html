@@ -20,6 +20,31 @@
     <div id="ff-canvas-container" class="animated-bg"></div>
     <div id="retro-bg" class="retro-bg hidden-area"></div>
 
+    <!-- 🧙‍♂️ 新增：答對題目時彈出的「塔羅翻牌效果」解鎖視窗 -->
+    <div id="cardUnlockOverlay" class="unlock-overlay hidden-area">
+        <div class="unlock-card-container">
+            <h3 class="unlock-overlay-title">✨ 獲得音樂法力卡牌！ ✨</h3>
+            <div class="unlock-perspective-box">
+                <div class="unlock-playing-card" id="unlockTarotCard">
+                    <!-- 卡牌背面 -->
+                    <div class="unlock-card-face unlock-card-back">
+                        <img src="卡片背面.jfif" alt="卡片背面" class="full-card-back-img">
+                    </div>
+                    <!-- 卡牌正面 -->
+                    <div class="unlock-card-face unlock-card-front">
+                        <div class="unlock-card-inner">
+                            <div class="unlock-card-icon" id="unlockCardIcon">🔮</div>
+                            <h4 class="unlock-card-name" id="unlockCardName">卡牌名稱</h4>
+                            <div class="unlock-card-tag" id="unlockCardTag">屬性</div>
+                            <p class="unlock-card-desc" id="unlockCardDesc">解鎖的樂理要素</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button type="button" id="confirmUnlockBtn" class="retro-action-btn" style="width: auto; padding: 10px 30px; margin-top: 15px; background: #ffd700; color: #000; font-weight: bold;">🎒 收下卡牌放入背包</button>
+        </div>
+    </div>
+
     <main class="app-container" id="appContainer">
         
         <!-- 頁面 1：首頁 -->
@@ -172,7 +197,7 @@
             <div class="retro-portal-box">
                 <p style="color: #00ffff; font-size: 0.85rem; margin-bottom: 8px;">⚡ 次元裂縫已開啟，前往 Suno 聖地具現化音樂：</p>
                 <a href="https://suno.com/create" target="_blank" style="text-decoration: none;">
-                    <button type="button" class="retro-portal-btn">🌀 開啟次元裂縫 (前往 Suno)</button>
+                    <button type="button" class="retro-portal-btn">🌀 開氣次元裂縫 (前往 Suno)</button>
                 </a>
             </div>
 
