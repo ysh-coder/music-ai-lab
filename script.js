@@ -52,11 +52,14 @@ let inspirationWall = [
     { name: "魔法學徒小華", mood: "魔法森林", url: "https://suno.com/song/demo-1", solveScore: "5" }
 ];
 
+// 冒險狀態機
 let adventureState = { 
     moodTitle: "", moodPrompt: "", 
     tempo: "", time_signature: "", instrument: "", sfx: "", tonality: "", 
     dynamics: "", texture: "", form: "", vocal: "", climax: "", 
-    step: 0, eventChoice: null, solveScore: 0, finalIntegerScore: 1 
+    step: 0, eventChoice: null, solveScore: 0, finalIntegerScore: 1,
+    collectedCards: [], // 收集到的像素音樂卡牌
+    placedCards: []     // 已注入魔法陣的卡牌
 };
 
 // 導航函數
@@ -143,7 +146,7 @@ if (copyPromptBtn) {
     });
 }
 
-// 🔗 快捷載入剪貼簿連結 (介面完全不顯示網址)
+// 🔗 快捷載入剪貼簿連結
 const quickPasteBtn = document.getElementById('quickPasteBtn');
 if (quickPasteBtn) {
     quickPasteBtn.addEventListener('click', async () => {
@@ -258,7 +261,7 @@ if (reDrawBtn) {
 const viewWallBtn = document.getElementById('viewWallBtn');
 if (viewWallBtn) {
     viewWallBtn.addEventListener('click', async () => { 
-        if (ffCanvasContainer) ffCanvasContainer.style.opacity = "1";
+        if (ffCanvasContainer) ffCanvasContainer.style.opacity = "1"; 
         await fetchWallData(); 
         showPage(page5); 
     });
@@ -273,19 +276,157 @@ if (cancelToPage3Btn) cancelToPage3Btn.addEventListener('click', () => showPage(
 const restartAdventureBtn = document.getElementById('restartAdventureBtn');
 if (restartAdventureBtn) restartAdventureBtn.addEventListener('click', resetApp);
 
+// 進入召喚殿堂 (Page 4)
 if (nextToPage4Btn) {
     nextToPage4Btn.addEventListener('click', () => {
-        // 更新了符合 10 個維度的 Prompt 組合
-        const promptText = `A high quality music track for ${adventureState.moodTitle}. ${adventureState.vocal}. Main instruments featuring ${adventureState.instrument}. ${adventureState.tonality}, ${adventureState.tempo}, ${adventureState.time_signature}. Dynamics: ${adventureState.dynamics}. Texture: ${adventureState.texture}. Form: ${adventureState.form}. Climax: ${adventureState.climax}. Atmosphere: ${adventureState.moodPrompt}. Additional SFX: ${adventureState.sfx}.`;
+        showPage(page4);
+        initCardAssemblyPage();
         
-        const promptEl = document.getElementById('resultPrompt');
-        if (promptEl) promptEl.innerText = promptText;
-        showPage(page4); 
-        
-        const ritualDialogue = `「現在，將你調配出的這段完整咒語帶去 Suno AI 聖地吧。生成音樂後，別忘了回來把它刻在靈感石碑上！」`;
+        const ritualDialogue = `「小小配樂家，你一共收集到了 ${adventureState.collectedCards.length} 張像素音樂卡牌！請將卡牌一一放入咒語插槽中，激活專屬的音樂元素吧！」`;
         const ritualTextEl = document.getElementById('ritualText');
-        if (ritualTextEl) typeWriterEffect(ritualTextEl, ritualDialogue, 30);
+        if (ritualTextEl) typeWriterEffect(ritualTextEl, ritualDialogue, 25);
     });
+}
+
+// =========================================
+// 🎴 卡牌收集與插槽召喚系統核心
+// =========================================
+function initCardAssemblyPage() {
+    adventureState.placedCards = [];
+    const deckContainer = document.getElementById('collectedCardsDeck');
+    const slotsContainer = document.getElementById('spellSlotsArea');
+    const promptEl = document.getElementById('resultPrompt');
+    const copyBtn = document.getElementById('copyPromptBtn');
+    const placedCountEl = document.getElementById('placedCardCount');
+    const totalCountEl = document.getElementById('totalCardCount');
+
+    if (promptEl) promptEl.innerText = "等待注入卡牌解鎖音樂元素...";
+    if (copyBtn) copyBtn.disabled = true;
+
+    // 若未獲取任何卡牌的容錯保護
+    if (adventureState.collectedCards.length === 0) {
+        adventureState.collectedCards.push({
+            id: 'mood',
+            name: '主題基石卡',
+            icon: '🔮',
+            tag: '主題',
+            promptSnippet: `A high quality music track for ${adventureState.moodTitle}. Atmosphere: ${adventureState.moodPrompt}.`
+        });
+    }
+
+    if (totalCountEl) totalCountEl.innerText = adventureState.collectedCards.length;
+    if (placedCountEl) placedCountEl.innerText = "0";
+
+    renderAssemblyUI();
+}
+
+function renderAssemblyUI() {
+    const deckContainer = document.getElementById('collectedCardsDeck');
+    const slotsContainer = document.getElementById('spellSlotsArea');
+    const placedCountEl = document.getElementById('placedCardCount');
+
+    if (!deckContainer || !slotsContainer) return;
+
+    deckContainer.innerHTML = '';
+    slotsContainer.innerHTML = '';
+
+    const remainingCards = adventureState.collectedCards.filter(c => !adventureState.placedCards.includes(c));
+
+    if (placedCountEl) placedCountEl.innerText = adventureState.placedCards.length;
+
+    // 渲染背包內可點選的卡牌
+    if (remainingCards.length === 0) {
+        deckContainer.innerHTML = "<p style='color:#4ade80; font-size:0.8rem; margin:auto;'>✨ 所有音樂卡牌已全部注入魔法陣！</p>";
+    } else {
+        remainingCards.forEach(card => {
+            const cardEl = document.createElement('div');
+            cardEl.className = 'pixel-card-chip';
+            cardEl.innerHTML = `
+                <div class="pixel-chip-icon">${card.icon}</div>
+                <div class="pixel-chip-name">${card.name}</div>
+                <div class="pixel-chip-tag">${card.tag}</div>
+            `;
+            cardEl.addEventListener('click', () => placeCardIntoAltar(card));
+            deckContainer.appendChild(cardEl);
+        });
+    }
+
+    // 渲染插槽
+    adventureState.collectedCards.forEach((card, idx) => {
+        const slotEl = document.createElement('div');
+        const isFilled = adventureState.placedCards.includes(card);
+        slotEl.className = `spell-slot ${isFilled ? 'active-filled' : ''}`;
+        slotEl.innerHTML = isFilled 
+            ? `<span>${card.icon} ${card.name}</span>`
+            : `<span>插槽 ${idx + 1}</span>`;
+        slotsContainer.appendChild(slotEl);
+    });
+}
+
+function placeCardIntoAltar(card) {
+    if (adventureState.placedCards.includes(card)) return;
+
+    playSpellSound('Piano');
+    adventureState.placedCards.push(card);
+    renderAssemblyUI();
+    updateSpellScroll(false);
+
+    // 全部卡牌注入完成
+    if (adventureState.placedCards.length === adventureState.collectedCards.length) {
+        triggerSummonCompletion();
+    }
+}
+
+// 一鍵全部注入按鈕
+const injectAllCardsBtn = document.getElementById('injectAllCardsBtn');
+if (injectAllCardsBtn) {
+    injectAllCardsBtn.addEventListener('click', () => {
+        adventureState.placedCards = [...adventureState.collectedCards];
+        playRitualFanfare();
+        renderAssemblyUI();
+        updateSpellScroll(true);
+        triggerSummonCompletion();
+    });
+}
+
+// 動態更新咒語文本
+function updateSpellScroll(isComplete = false) {
+    const promptEl = document.getElementById('resultPrompt');
+    if (!promptEl) return;
+
+    if (adventureState.placedCards.length === 0) {
+        promptEl.innerText = "等待注入卡牌解鎖音樂元素...";
+        return;
+    }
+
+    // 依序組合當前已放入卡牌所代表的樂理描述
+    const baseTheme = `A high quality music track for ${adventureState.moodTitle}. `;
+    const elementsText = adventureState.placedCards.map(c => c.promptSnippet).join(" ");
+    
+    promptEl.innerText = baseTheme + elementsText;
+}
+
+// 召喚成功儀式觸發
+function triggerSummonCompletion() {
+    const copyBtn = document.getElementById('copyPromptBtn');
+    if (copyBtn) copyBtn.disabled = false;
+
+    playRitualFanfare();
+    if (appContainer) {
+        appContainer.classList.add('screen-shake');
+        setTimeout(() => appContainer.classList.remove('screen-shake'), 600);
+    }
+
+    // 生成最終嚴謹的完整 Prompt
+    const fullFinalPrompt = `A high quality music track for ${adventureState.moodTitle}. ${adventureState.vocal || "Instrumental"}. Main instruments featuring ${adventureState.instrument || "Orchestra"}. ${adventureState.tonality || "Major key"}, ${adventureState.tempo || "Moderate tempo"}, ${adventureState.time_signature || "4/4 time"}. Dynamics: ${adventureState.dynamics || "Balanced"}. Texture: ${adventureState.texture || "Homophonic"}. Form: ${adventureState.form || "Theme and variation"}. Climax: ${adventureState.climax || "Grand ending"}. Atmosphere: ${adventureState.moodPrompt}. Additional SFX: ${adventureState.sfx || "Ambient nature sounds"}.`;
+
+    const promptEl = document.getElementById('resultPrompt');
+    if (promptEl) promptEl.innerText = fullFinalPrompt;
+
+    const ritualTextEl = document.getElementById('ritualText');
+    if (ritualTextEl) {
+        typeWriterEffect(ritualTextEl, "「古代音樂魔導咒語已完全具現化！快點擊下方抄寫咒語，並開啟次元裂縫前往 Suno 聖地吧！」", 25);
+    }
 }
 
 // =========================================
@@ -361,7 +502,7 @@ function playSpellSound(type) {
                 playTone(783.99, 'triangle', now+0.2, 0.4, 0.1); playTone(1046.50, 'triangle', now+0.3, 0.8, 0.1);
                 break;
             case 'Major Key': playTone(523.25, 'triangle', now, 0.8, 0.1); playTone(659.25, 'triangle', now, 0.8, 0.1); playTone(783.99, 'triangle', now, 0.8, 0.1); break;
-            case 'Minor Key': playTone(440, 'triangle', now, 0.8, 0.1); playTone(523.25, 'triangle', now, 0.8, 0.1); playTone(659.25, 'triangle', now, 0.8, 0.1); break;
+            case 'Minor Key': playTone(440, 'triangle', now, 0.8, 0.1); playTone(523.25, 'triangle', now, 0.8, 0.1); break;
             case 'Pentatonic': [523.25, 587.33, 659.25, 783.99, 880].forEach((f, i) => playTone(f, 'sine', now + i*0.12, 0.4, 0.08)); break;
             case 'Slow tempo': playTone(800, 'square', now, 0.08, 0.02); playTone(800, 'square', now+0.5, 0.08, 0.02); break;
             case 'Moderate tempo': playTone(800, 'square', now, 0.08, 0.02); playTone(800, 'square', now+0.25, 0.08, 0.02); break;
@@ -374,40 +515,40 @@ function playSpellSound(type) {
 }
 
 // =========================================
-// 📜 主題情境配樂引導劇本 (擴展為 10題 + 1事件 = 12階段)
+// 📜 主題情境配樂引導劇本
 // =========================================
 const rpgFlow = [
     {
         systemText: "【系統提示】你推開了魔法公會沉重的木門，煙霧瀰漫...",
-        getDialogue: () => `翁sir 扶了扶眼鏡，親切地笑道：「歡迎你，小小配樂家！你抽到了『${adventureState.moodTitle}』命運卡！要為這個場景譜寫出完美的音樂，我們必須進行 10 道魔法考驗。準備好接受我的引導了嗎？」`,
+        getDialogue: () => `翁sir 扶了扶眼鏡，親切地笑道：「歡迎你，小小配樂家！你抽到了『${adventureState.moodTitle}』命運卡！進行 10 道魔法考驗，每達成契合即可收集一張『像素音樂卡牌』，準備好了嗎？」`,
         choices: [{ text: "我準備好了，翁sir！", nextStep: 1 }]
     },
     { // Q1
         systemText: "【第一道配樂考驗：速度 (Tempo)】",
         getDialogue: () => `翁sir 問道：「首先，想像『${adventureState.moodTitle}』的畫面。主角的步伐與場景流動應該是怎樣的速度？」`,
         choices: [
-            { text: "🐢 沉靜緩慢 (慢板 Adagio)", value: "Slow tempo (Adagio), 60 BPM", nextStep: 2, key: "tempo", sound: "Slow tempo", action: () => evaluateStep('tempo', 'Slow tempo') },
-            { text: "🚶 悠閒漫步 (行板 Andante)", value: "Moderate tempo (Andante), 85 BPM", nextStep: 2, key: "tempo", sound: "Moderate tempo", action: () => evaluateStep('tempo', 'Moderate tempo') },
-            { text: "🏃 歡樂奔馳 (快板 Allegro)", value: "Fast tempo (Allegro), 130 BPM", nextStep: 2, key: "tempo", sound: "Fast tempo", action: () => evaluateStep('tempo', 'Fast tempo') }
+            { text: "🐢 沉靜緩慢 (慢板 Adagio)", value: "Slow tempo (Adagio), 60 BPM", nextStep: 2, key: "tempo", sound: "Slow tempo", action: () => evaluateAndAwardCard('tempo', 'Slow tempo', '🐢 速度之石', '🐢', '速度', 'Slow tempo (Adagio), 60 BPM') },
+            { text: "🚶 悠閒漫步 (行板 Andante)", value: "Moderate tempo (Andante), 85 BPM", nextStep: 2, key: "tempo", sound: "Moderate tempo", action: () => evaluateAndAwardCard('tempo', 'Moderate tempo', '🚶 步調符文', '🚶', '速度', 'Moderate tempo (Andante), 85 BPM') },
+            { text: "🏃 歡樂奔馳 (快板 Allegro)", value: "Fast tempo (Allegro), 130 BPM", nextStep: 2, key: "tempo", sound: "Fast tempo", action: () => evaluateAndAwardCard('tempo', 'Fast tempo', '🏃 奔馳徽章', '🏃', '速度', 'Fast tempo (Allegro), 130 BPM') }
         ]
     },
     { // Q2
         systemText: "【第二道配樂考驗：拍號 (Time Signature)】",
         getDialogue: () => `翁sir 點點頭：「節拍決定了律動的感覺。你覺得這個故事的舞步是哪種節拍？」`,
         choices: [
-            { text: "⚖️ 穩定行進 (4/4拍)", value: "4/4 time signature", nextStep: 3, key: "time_signature", action: () => evaluateStep('time_signature', '4/4') },
-            { text: "💃 旋轉圓舞曲 (3/4拍)", value: "3/4 time signature (Waltz)", nextStep: 3, key: "time_signature", action: () => evaluateStep('time_signature', '3/4') },
-            { text: "🪖 活潑進行曲 (2/4拍)", value: "2/4 time signature (March)", nextStep: 3, key: "time_signature", action: () => evaluateStep('time_signature', '2/4') }
+            { text: "⚖️ 穩定行進 (4/4拍)", value: "4/4 time signature", nextStep: 3, key: "time_signature", action: () => evaluateAndAwardCard('time_signature', '4/4', '⚖️ 衡律節奏卡', '⚖️', '拍號', '4/4 time signature') },
+            { text: "💃 旋轉圓舞曲 (3/4拍)", value: "3/4 time signature (Waltz)", nextStep: 3, key: "time_signature", action: () => evaluateAndAwardCard('time_signature', '3/4', '💃 圓舞符文卡', '💃', '拍號', '3/4 time signature (Waltz)') },
+            { text: "🪖 活潑進行曲 (2/4拍)", value: "2/4 time signature (March)", nextStep: 3, key: "time_signature", action: () => evaluateAndAwardCard('time_signature', '2/4', '🪖 進行曲徽章', '🪖', '拍號', '2/4 time signature (March)') }
         ]
     },
     { // Q3
         systemText: "【第三道配樂考驗：樂器家族 (Instrument)】",
         getDialogue: () => `「很好！接下來是【音色法器】。要描繪這個故事，哪一種樂器家族最能代表你的主角音色？」`,
         choices: [
-            { text: "🎻 弦樂家族 (溫暖連綿)", value: "Strings", nextStep: 4, key: "instrument", sound: "Strings", action: () => evaluateStep('instrument', 'Strings') },
-            { text: "🌬️ 木管家族 (空靈清脆)", value: "Woodwinds", nextStep: 4, key: "instrument", sound: "Woodwinds", action: () => evaluateStep('instrument', 'Woodwinds') },
-            { text: "🎺 銅管家族 (輝煌宏大)", value: "Brass", nextStep: 4, key: "instrument", sound: "Brass", action: () => evaluateStep('instrument', 'Brass') },
-            { text: "🎹 鍵盤法器 (靈動敲擊)", value: "Piano", nextStep: 4, key: "instrument", sound: "Piano", action: () => evaluateStep('instrument', 'Piano') }
+            { text: "🎻 弦樂家族 (溫暖連綿)", value: "Strings", nextStep: 4, key: "instrument", sound: "Strings", action: () => evaluateAndAwardCard('instrument', 'Strings', '🎻 弦音魔琴卡', '🎻', '樂器', 'Featuring rich Strings ensemble') },
+            { text: "🌬️ 木管家族 (空靈清脆)", value: "Woodwinds", nextStep: 4, key: "instrument", sound: "Woodwinds", action: () => evaluateAndAwardCard('instrument', 'Woodwinds', '🌬️ 風語長笛卡', '🌬️', '樂器', 'Featuring enchanted Woodwinds') },
+            { text: "🎺 銅管家族 (輝煌宏大)", value: "Brass", nextStep: 4, key: "instrument", sound: "Brass", action: () => evaluateAndAwardCard('instrument', 'Brass', '🎺 榮耀號角卡', '🎺', '樂器', 'Featuring triumphant Brass') },
+            { text: "🎹 鍵盤法器 (靈動敲擊)", value: "Piano", nextStep: 4, key: "instrument", sound: "Piano", action: () => evaluateAndAwardCard('instrument', 'Piano', '🎹 靈動黑白卡', '🎹', '樂器', 'Featuring expressive Piano melody') }
         ]
     },
     { // 突發事件 (Step 4)
@@ -427,103 +568,115 @@ const rpgFlow = [
             return `${ev}<br><br>「化險為夷！現在，你想在背景中加入什麼聲音來增添環境魔法？」`;
         },
         choices: [
-            { text: "🍃 微風與樹葉沙沙聲", value: "Nature sounds, gentle wind and rustling leaves", nextStep: 6, key: "sfx", action: () => evaluateStep('sfx', 'Nature') },
-            { text: "🐦 鳥鳴與森林蟲鳴聲", value: "Ambient bird chirping and forest sounds", nextStep: 6, key: "sfx", action: () => evaluateStep('sfx', 'Nature') },
-            { text: "✨ 閃閃發光的魔法音效", value: "Sparkling magic sound effects, chime sparkles", nextStep: 6, key: "sfx", action: () => evaluateStep('sfx', 'Magic') }
+            { text: "🍃 微風與樹葉沙沙聲", value: "Nature sounds, gentle wind and rustling leaves", nextStep: 6, key: "sfx", action: () => evaluateAndAwardCard('sfx', 'Nature', '🍃 自然之風卡', '🍃', '環境音', 'with nature wind and rustling leaves') },
+            { text: "🐦 鳥鳴與森林蟲鳴聲", value: "Ambient bird chirping and forest sounds", nextStep: 6, key: "sfx", action: () => evaluateAndAwardCard('sfx', 'Nature', '🐦 生靈之語卡', '🐦', '環境音', 'with ambient birds chirping') },
+            { text: "✨ 閃閃發光的魔法音效", value: "Sparkling magic sound effects, chime sparkles", nextStep: 6, key: "sfx", action: () => evaluateAndAwardCard('sfx', 'Magic', '✨ 璀璨星塵卡', '✨', '環境音', 'with magical sparkling chime sparkles') }
         ]
     },
     { // Q5
         systemText: "【第五道配樂考驗：調性色彩 (Tonality)】",
         getDialogue: () => `「完美的點綴！接下來是【光影色彩】。你希望這首配樂帶給聽眾什麼樣的情緒色彩？聽聽看這些和弦的聲音！」`,
         choices: [
-            { text: "☀️ 光明大調 (Major Key)", value: "composed in Major Key", nextStep: 7, key: "tonality", sound: "Major Key", action: () => evaluateStep('tonality', 'Major') },
-            { text: "🌑 暗影小調 (Minor Key)", value: "composed in Minor Key", nextStep: 7, key: "tonality", sound: "Minor Key", action: () => evaluateStep('tonality', 'Minor') },
-            { text: "🌟 星光音階 (Pentatonic)", value: "composed in Pentatonic Scale", nextStep: 7, key: "tonality", sound: "Pentatonic", action: () => evaluateStep('tonality', 'Pentatonic') }
+            { text: "☀️ 光明大調 (Major Key)", value: "composed in Major Key", nextStep: 7, key: "tonality", sound: "Major Key", action: () => evaluateAndAwardCard('tonality', 'Major', '☀️ 曜日大調卡', '☀️', '調性', 'composed in Major Key') },
+            { text: "🌑 暗影小調 (Minor Key)", value: "composed in Minor Key", nextStep: 7, key: "tonality", sound: "Minor Key", action: () => evaluateAndAwardCard('tonality', 'Minor', '🌑 暗影小調卡', '🌑', '調性', 'composed in Minor Key') },
+            { text: "🌟 星光音階 (Pentatonic)", value: "composed in Pentatonic Scale", nextStep: 7, key: "tonality", sound: "Pentatonic", action: () => evaluateAndAwardCard('tonality', 'Pentatonic', '🌟 星河五聲卡', '🌟', '調性', 'composed in Pentatonic Scale') }
         ]
     },
     { // Q6
         systemText: "【第六道配樂考驗：力度變化 (Dynamics)】",
         getDialogue: () => `翁sir 滿意地說：「這調性太棒了！那麼，音樂的能量強弱決定了張力，這首曲子的整體力量感應該如何？」`,
         choices: [
-            { text: "🤫 輕柔神祕 (Piano, p)", value: "Soft dynamics (Piano)", nextStep: 8, key: "dynamics", action: () => evaluateStep('dynamics', 'Piano') },
-            { text: "🗣️ 溫和流暢 (Mezzo-forte, mf)", value: "Moderate dynamics (Mezzo-forte)", nextStep: 8, key: "dynamics", action: () => evaluateStep('dynamics', 'Mezzo-forte') },
-            { text: "📢 強烈震撼 (Forte, f)", value: "Loud and powerful dynamics (Forte)", nextStep: 8, key: "dynamics", action: () => evaluateStep('dynamics', 'Forte') }
+            { text: "🤫 輕柔神祕 (Piano, p)", value: "Soft dynamics (Piano)", nextStep: 8, key: "dynamics", action: () => evaluateAndAwardCard('dynamics', 'Piano', '🤫 靜謐輕柔卡', '🤫', '力度', 'Soft dynamics (Piano)') },
+            { text: "🗣️ 溫和流暢 (Mezzo-forte, mf)", value: "Moderate dynamics (Mezzo-forte)", nextStep: 8, key: "dynamics", action: () => evaluateAndAwardCard('dynamics', 'Mezzo-forte', '🗣️ 柔和流暢卡', '🗣️', '力度', 'Moderate dynamics (Mezzo-forte)') },
+            { text: "📢 強烈震撼 (Forte, f)", value: "Loud and powerful dynamics (Forte)", nextStep: 8, key: "dynamics", action: () => evaluateAndAwardCard('dynamics', 'Forte', '📢 震撼轟鳴卡', '📢', '力度', 'Loud and powerful dynamics (Forte)') }
         ]
     },
     { // Q7
         systemText: "【第七道配樂考驗：織體層次 (Texture)】",
         getDialogue: () => `「力度控制得很好！魔法陣的結構需要確立，你希望音樂的層次是單純還是複雜？」`,
         choices: [
-            { text: "🧵 單一旋律 (單音音樂)", value: "Monophonic texture, single clear melody", nextStep: 9, key: "texture", action: () => evaluateStep('texture', 'Monophonic') },
-            { text: "🧶 旋律配和弦 (主音音樂)", value: "Homophonic texture, melody with chordal accompaniment", nextStep: 9, key: "texture", action: () => evaluateStep('texture', 'Homophonic') },
-            { text: "🕸️ 多聲部交織 (複音音樂)", value: "Polyphonic texture, complex weaving melodies", nextStep: 9, key: "texture", action: () => evaluateStep('texture', 'Polyphonic') }
+            { text: "🧵 單一旋律 (單音音樂)", value: "Monophonic texture, single clear melody", nextStep: 9, key: "texture", action: () => evaluateAndAwardCard('texture', 'Monophonic', '🧵 純粹單音卡', '🧵', '織體', 'Monophonic texture') },
+            { text: "🧶 旋律配和弦 (主音音樂)", value: "Homophonic texture, melody with chordal accompaniment", nextStep: 9, key: "texture", action: () => evaluateAndAwardCard('texture', 'Homophonic', '🧶 和弦主音卡', '🧶', '織體', 'Homophonic texture') },
+            { text: "🕸️ 多聲部交織 (複音音樂)", value: "Polyphonic texture, complex weaving melodies", nextStep: 9, key: "texture", action: () => evaluateAndAwardCard('texture', 'Polyphonic', '🕸️ 複音交織卡', '🕸️', '織體', 'Polyphonic texture') }
         ]
     },
     { // Q8
         systemText: "【第八道配樂考驗：曲式結構 (Form)】",
         getDialogue: () => `「故事的發展需要藍圖。你想讓這首配樂依照什麼結構進行？」`,
         choices: [
-            { text: "🔄 三段體 (ABA 結構)", value: "ABA Ternary form", nextStep: 10, key: "form", action: () => evaluateStep('form', 'ABA') },
-            { text: "📖 主題與變奏 (變奏曲)", value: "Theme and Variation form", nextStep: 10, key: "form", action: () => evaluateStep('form', 'Theme') },
-            { text: "🔁 迴旋曲式 (Rondo)", value: "Rondo form", nextStep: 10, key: "form", action: () => evaluateStep('form', 'Rondo') }
+            { text: "🔄 三段體 (ABA 結構)", value: "ABA Ternary form", nextStep: 10, key: "form", action: () => evaluateAndAwardCard('form', 'ABA', '🔄 三段輪迴卡', '🔄', '曲式', 'ABA Ternary form') },
+            { text: "📖 主題與變奏 (變奏曲)", value: "Theme and Variation form", nextStep: 10, key: "form", action: () => evaluateAndAwardCard('form', 'Theme', '📖 奇想變奏卡', '📖', '曲式', 'Theme and Variation form') },
+            { text: "🔁 迴旋曲式 (Rondo)", value: "Rondo form", nextStep: 10, key: "form", action: () => evaluateAndAwardCard('form', 'Rondo', '🔁 永恆迴旋卡', '🔁', '曲式', 'Rondo form') }
         ]
     },
     { // Q9
         systemText: "【第九道配樂考驗：人聲精靈 (Vocal/Inst)】",
         getDialogue: () => `翁sir 瞇起眼睛：「大功告成一大半了！這部配樂需要人類精靈唱出歌詞，還是純粹的樂器原聲帶？」`,
         choices: [
-            { text: "純樂器魔法 (無人聲)", value: "Instrumental only, no vocals", nextStep: 11, key: "vocal", action: () => evaluateStep('vocal', 'None') },
-            { text: "男聲精靈吟唱", value: "Featuring a male lead vocalist", nextStep: 11, key: "vocal", action: () => evaluateStep('vocal', 'Male') },
-            { text: "女聲精靈吟唱", value: "Featuring a female lead vocalist", nextStep: 11, key: "vocal", action: () => evaluateStep('vocal', 'Female') }
+            { text: "純樂器魔法 (無人聲)", value: "Instrumental only, no vocals", nextStep: 11, key: "vocal", action: () => evaluateAndAwardCard('vocal', 'None', '🚫 純淨器樂卡', '🚫', '人聲', 'Instrumental only, no vocals') },
+            { text: "男聲精靈吟唱", value: "Featuring a male lead vocalist", nextStep: 11, key: "vocal", action: () => evaluateAndAwardCard('vocal', 'Male', '👦 晨曦男聲卡', '👦', '人聲', 'Featuring a male lead vocalist') },
+            { text: "女聲精靈吟唱", value: "Featuring a female lead vocalist", nextStep: 11, key: "vocal", action: () => evaluateAndAwardCard('vocal', 'Female', '👧 夜鶯女聲卡', '👧', '人聲', 'Featuring a female lead vocalist') }
         ]
     },
     { // Q10
         systemText: "【第十道配樂考驗：情感高潮 (Climax)】",
         getDialogue: () => `「來到最後一道咒語！在樂曲的結尾，你希望帶給聽眾什麼樣的感受？」`,
         choices: [
-            { text: "🌅 漸強後爆發的壯闊結尾", value: "Epic crescendo climax at the end", nextStep: 12, key: "climax", action: () => evaluateStep('climax', 'Epic') },
-            { text: "🌫️ 漸弱後消失在迷霧的收尾", value: "Fading out softly (Diminuendo) ending", nextStep: 12, key: "climax", action: () => evaluateStep('climax', 'Fade') },
-            { text: "🎢 突強突弱的驚喜反轉", value: "Sudden dynamic shifts and surprise ending", nextStep: 12, key: "climax", action: () => evaluateStep('climax', 'Surprise') }
+            { text: "🌅 漸強後爆發的壯闊結尾", value: "Epic crescendo climax at the end", nextStep: 12, key: "climax", action: () => evaluateAndAwardCard('climax', 'Epic', '🌅 烈日爆發卡', '🌅', '終章', 'Epic crescendo climax') },
+            { text: "🌫️ 漸弱後消失在迷霧的收尾", value: "Fading out softly (Diminuendo) ending", nextStep: 12, key: "climax", action: () => evaluateAndAwardCard('climax', 'Fade', '🌫️ 幽霧消散卡', '🌫️', '終章', 'Fading out softly ending') },
+            { text: "🎢 突強突弱的驚喜反轉", value: "Sudden dynamic shifts and surprise ending", nextStep: 12, key: "climax", action: () => evaluateAndAwardCard('climax', 'Surprise', '🎢 逆轉命運卡', '🎢', '終章', 'Sudden dynamic shifts') }
         ]
     }
 ];
 
-// 10 題核心演算法：給予原始積點 (+1 或 +0)
-function evaluateStep(type, selectedValue) {
+// 核心評核與卡牌獎勵機制
+function evaluateAndAwardCard(type, selectedValue, cardName, cardIcon, cardTag, promptSnippet) {
     const title = adventureState.moodTitle;
-    let point = 0;
+    let isMatched = false;
 
     if (type === 'tempo') {
-        if (["快樂動物園", "遊樂園探險", "熱血運動會", "闖關遊戲", "生日派對"].includes(title) && selectedValue.includes("Fast")) point = 1;
-        else if (["甜甜夢鄉", "下雨的窗邊", "海底世界"].includes(title) && selectedValue.includes("Slow")) point = 1;
-        else if (["魔法森林", "宇宙探險"].includes(title) && selectedValue.includes("Moderate")) point = 1;
+        if (["快樂動物園", "遊樂園探險", "熱血運動會", "闖關遊戲", "生日派對"].includes(title) && selectedValue.includes("Fast")) isMatched = true;
+        else if (["甜甜夢鄉", "下雨的窗邊", "海底世界"].includes(title) && selectedValue.includes("Slow")) isMatched = true;
+        else if (["魔法森林", "宇宙探險"].includes(title) && selectedValue.includes("Moderate")) isMatched = true;
     } else if (type === 'time_signature') {
-        if (["遊樂園探險", "甜甜夢鄉", "魔法森林"].includes(title) && selectedValue.includes("3/4")) point = 1;
-        else if (["熱血運動會", "闖關遊戲", "宇宙探險"].includes(title) && selectedValue.includes("4/4")) point = 1;
-        else if (selectedValue.includes("2/4") || selectedValue.includes("4/4")) point = 1; 
+        if (["遊樂園探險", "甜甜夢鄉", "魔法森林"].includes(title) && selectedValue.includes("3/4")) isMatched = true;
+        else if (["熱血運動會", "闖關遊戲", "宇宙探險"].includes(title) && selectedValue.includes("4/4")) isMatched = true;
+        else if (selectedValue.includes("2/4") || selectedValue.includes("4/4")) isMatched = true; 
     } else if (type === 'instrument') {
-        if (["下雨的窗邊", "甜甜夢鄉"].includes(title) && selectedValue === "Strings") point = 1;
-        else if (["熱血運動會", "遊樂園探險"].includes(title) && selectedValue === "Brass") point = 1;
-        else if (["快樂動物園", "海底世界", "魔法森林"].includes(title) && selectedValue === "Woodwinds") point = 1;
-        else if (["闖關遊戲", "生日派對", "宇宙探險"].includes(title) && selectedValue === "Piano") point = 1;
+        if (["下雨的窗邊", "甜甜夢鄉"].includes(title) && selectedValue === "Strings") isMatched = true;
+        else if (["熱血運動會", "遊樂園探險"].includes(title) && selectedValue === "Brass") isMatched = true;
+        else if (["快樂動物園", "海底世界", "魔法森林"].includes(title) && selectedValue === "Woodwinds") isMatched = true;
+        else if (["闖關遊戲", "生日派對", "宇宙探險"].includes(title) && selectedValue === "Piano") isMatched = true;
     } else if (type === 'sfx') {
-        if (["魔法森林", "快樂動物園", "下雨的窗邊"].includes(title) && selectedValue.includes("Nature")) point = 1;
-        else if (["宇宙探險", "魔法森林", "海底世界"].includes(title) && selectedValue.includes("Magic")) point = 1;
-        else point = 1; 
+        if (["魔法森林", "快樂動物園", "下雨的窗邊"].includes(title) && selectedValue.includes("Nature")) isMatched = true;
+        else if (["宇宙探險", "魔法森林", "海底世界"].includes(title) && selectedValue.includes("Magic")) isMatched = true;
+        else isMatched = true; 
     } else if (type === 'tonality') {
-        if (["快樂動物園", "遊樂園探險", "生日派對", "熱血運動會"].includes(title) && selectedValue.includes("Major")) point = 1;
-        else if (["下雨的窗邊", "宇宙探險", "闖關遊戲"].includes(title) && selectedValue.includes("Minor")) point = 1;
-        else if (["魔法森林", "甜甜夢鄉", "海底世界"].includes(title) && selectedValue.includes("Pentatonic")) point = 1;
+        if (["快樂動物園", "遊樂園探險", "生日派對", "熱血運動會"].includes(title) && selectedValue.includes("Major")) isMatched = true;
+        else if (["下雨的窗邊", "宇宙探險", "闖關遊戲"].includes(title) && selectedValue.includes("Minor")) isMatched = true;
+        else if (["魔法森林", "甜甜夢鄉", "海底世界"].includes(title) && selectedValue.includes("Pentatonic")) isMatched = true;
     } else if (type === 'dynamics') {
-        if (["甜甜夢鄉", "下雨的窗邊", "海底世界"].includes(title) && selectedValue.includes("Piano")) point = 1;
-        else if (["熱血運動會", "闖關遊戲", "宇宙探險"].includes(title) && selectedValue.includes("Forte")) point = 1;
-        else if (["快樂動物園", "遊樂園探險", "魔法森林", "生日派對"].includes(title) && selectedValue.includes("Mezzo-forte")) point = 1;
+        if (["甜甜夢鄉", "下雨的窗邊", "海底世界"].includes(title) && selectedValue.includes("Piano")) isMatched = true;
+        else if (["熱血運動會", "闖關遊戲", "宇宙探險"].includes(title) && selectedValue.includes("Forte")) isMatched = true;
+        else if (["快樂動物園", "遊樂園探險", "魔法森林", "生日派對"].includes(title) && selectedValue.includes("Mezzo-forte")) isMatched = true;
     } else if (['texture', 'form', 'vocal', 'climax'].includes(type)) {
-        // 進階維度：只要學生能合理選擇即給予鼓勵分 1 點
-        point = 1; 
+        isMatched = true; 
     }
 
-    adventureState.solveScore += point;
+    if (isMatched) {
+        adventureState.solveScore += 1;
+        // 頒發像素卡牌
+        adventureState.collectedCards.push({
+            id: type,
+            name: cardName,
+            icon: cardIcon,
+            tag: cardTag,
+            promptSnippet: promptSnippet
+        });
+        
+        const counterEl = document.getElementById('rpgCardCounter');
+        if (counterEl) counterEl.innerText = adventureState.collectedCards.length;
+    }
 }
 
 // 打字機引擎
@@ -599,7 +752,6 @@ function triggerEvaluationReveal() {
     }
     playRitualFanfare();
     
-    // 原始積點轉換為 1-5 分
     const pts = adventureState.solveScore;
     let finalIntScore = 1;
     let titleText = "初心體驗者";
@@ -614,10 +766,13 @@ function triggerEvaluationReveal() {
 
     const scoreEl = document.getElementById('problemSolvingScore');
     if (scoreEl) scoreEl.innerText = `${finalIntScore} / 5 分`;
+
+    const evalCardsCountEl = document.getElementById('evalCardsCount');
+    if (evalCardsCountEl) evalCardsCountEl.innerText = `${adventureState.collectedCards.length} 張`;
     
     showPage(page3); 
     
-    const evalDialogue = `「太棒了！你完美完成了 10 道考驗。根據你的樂理直覺，我授與你【${titleText}】的階級！現在前往魔法公會領取你的完整咒語吧！」`;
+    const evalDialogue = `「太棒了！你在 10 道考驗中一共贏得了 ${adventureState.collectedCards.length} 張像素音樂卡牌，榮獲【${titleText}】階級！現在前往魔法公會將卡牌注入魔法陣，合成終極咒語吧！」`;
     const evalTextEl = document.getElementById('evalTutorText');
     if (evalTextEl) typeWriterEffect(evalTextEl, evalDialogue, 30);
 }
@@ -640,7 +795,7 @@ async function fetchWallData() {
     }
 }
 
-// 🎨 渲染靈感牆：網址已隱藏，點擊文字直接聽歌
+// 🎨 渲染靈感牆
 function renderWall() {
     const wall = document.getElementById('wallContainer');
     if (!wall) return;
@@ -683,9 +838,14 @@ function resetApp() {
         moodTitle: "", moodPrompt: "", 
         tempo: "", time_signature: "", instrument: "", sfx: "", tonality: "", 
         dynamics: "", texture: "", form: "", vocal: "", climax: "", 
-        step: 0, eventChoice: null, solveScore: 0, finalIntegerScore: 1 
+        step: 0, eventChoice: null, solveScore: 0, finalIntegerScore: 1,
+        collectedCards: [],
+        placedCards: []
     };
     
+    const counterEl = document.getElementById('rpgCardCounter');
+    if (counterEl) counterEl.innerText = "0";
+
     if (moodCard) moodCard.classList.remove('flipped');
     if (reDrawBtn) reDrawBtn.classList.add('hidden-btn');
     if (startAdventureBtn) startAdventureBtn.classList.add('hidden-btn');
