@@ -75,10 +75,15 @@
 
         <!-- 頁面 2：8-bit 文字冒險 -->
         <section id="page2" class="page retro-page hidden">
-            <h2 class="retro-title">=== 魔法公會 地下室 ===</h2>
+            <div class="rpg-header-status">
+                <h2 class="retro-title">=== 魔法公會 地下室 ===</h2>
+                <div class="rpg-bag-counter">🎒 收集卡牌: <span id="rpgCardCounter">0</span> 張</div>
+            </div>
+            
             <div class="retro-scene-container">
                 <img src="image_1790582816113453.png" alt="公會地下室場景" class="retro-scene-banner">
             </div>
+
             <div class="rpg-main-layout">
                 <div class="tutor-avatar retro-avatar">
                     <img src="Gemini_Generated_Image_rtdwrqrtdwrqrtdw.jfif" alt="魔法師翁sir" class="pixel-wizard-img">
@@ -88,8 +93,10 @@
                     <p id="tutorText">...</p> 
                 </div>
             </div>
+
             <div id="systemBox" class="retro-system-box" style="display: none;"></div>
             <div id="adventureChoices" class="choice-container retro-choices"></div>
+
             <div class="button-group retro-footer">
                 <button id="restartAdventureBtn" class="retro-btn-escape">逃跑 (返回首頁)</button>
             </div>
@@ -107,45 +114,68 @@
                     <p id="evalTutorText">正在衡量你的魔法能量...</p>
                 </div>
             </div>
+
             <div class="retro-evaluation-board">
                 <div class="eval-title">🎯 能力評核結果</div>
                 <div class="eval-row" style="font-size: 1.15rem; padding: 10px 0;">
                     <span>🔍 探究解難能力:</span>
                     <span class="eval-score" id="problemSolvingScore">0 / 5 分</span>
                 </div>
+                <div class="eval-row" style="font-size: 1.0rem; padding-bottom: 5px; border-top: 1px dashed rgba(255,255,255,0.3); padding-top: 8px;">
+                    <span>🎒 獲得像素卡牌:</span>
+                    <span class="eval-score" id="evalCardsCount" style="color: #ffd700;">0 張</span>
+                </div>
             </div>
+
             <div class="button-group retro-footer" style="margin-top: 30px;">
                 <button id="cancelToHomeBtn" class="retro-btn-escape">逃跑 (返回首頁)</button>
-                <button id="nextToPage4Btn" class="retro-choice-btn" style="flex: 1.5; justify-content: center;">👉 下一步：獲取咒語</button>
+                <button id="nextToPage4Btn" class="retro-choice-btn" style="flex: 1.5; justify-content: center;">👉 下一步：前往召喚殿堂</button>
             </div>
         </section>
 
         <!-- 頁面 4：輸入魔法咒語與 Suno 創作頁面 -->
         <section id="page4" class="page retro-page hidden">
             <h2 class="retro-title">=== 禁忌魔法 召喚殿堂 ===</h2>
-            <div class="rpg-main-layout" style="margin-bottom: 15px;">
+            <div class="rpg-main-layout" style="margin-bottom: 12px;">
                 <div class="tutor-avatar retro-avatar" style="margin-bottom: 0;">
-                    <img src="Gemini_Generated_Image_rtdwrqrtdwrqrtdw.jfif" alt="魔法師翁sir" class="pixel-wizard-img" style="width: 70px; height: 70px;">
+                    <img src="Gemini_Generated_Image_rtdwrqrtdwrqrtdw.jfif" alt="魔法師翁sir" class="pixel-wizard-img" style="width: 65px; height: 65px;">
                 </div>
-                <div class="dialogue-box retro-dialogue" style="min-height: 70px; background: #0000aa;">
+                <div class="dialogue-box retro-dialogue" style="min-height: 65px; background: #0000aa;">
                     <h3 id="ritualTutorName" style="color: #ffff00;">▶ 魔法師翁sir</h3>
                     <p id="ritualText" style="color: #fff; font-size: 0.85rem;">...</p>
                 </div>
             </div>
+
+            <!-- 🎴 卡牌收集背包與魔法陣插槽區 -->
+            <div class="card-assembly-module">
+                <div class="assembly-header">
+                    <span>🎒 學徒卡牌背包 (點擊卡牌注入魔法陣)</span>
+                    <button type="button" id="injectAllCardsBtn" class="retro-mini-btn">⚡ 一鍵全部注入</button>
+                </div>
+                <div id="collectedCardsDeck" class="cards-deck-flex"></div>
+
+                <div class="altar-slots-header">🔮 咒語魔法陣插槽 (<span id="placedCardCount">0</span>/<span id="totalCardCount">0</span>)</div>
+                <div id="spellSlotsArea" class="spell-slots-grid"></div>
+            </div>
+
             <div class="pixel-magic-circle-container">
                 <div class="pixel-magic-circle" id="magicCircle">✦ ✧ ✦ ✧ ✦ ✧ ✦</div>
             </div>
+
+            <!-- 咒語卷軸箱 -->
             <div class="retro-scroll-box">
                 <div class="scroll-header">📜 【古代音樂魔導咒語】</div>
-                <p id="resultPrompt" class="retro-spell-content">詠唱中...</p>
-                <button id="copyPromptBtn" class="retro-action-btn">📋 抄寫咒語 (複製)</button>
+                <p id="resultPrompt" class="retro-spell-content">等待注入卡牌解鎖音樂元素...</p>
+                <button id="copyPromptBtn" class="retro-action-btn" disabled>📋 抄寫咒語 (複製)</button>
             </div>
+
             <div class="retro-portal-box">
                 <p style="color: #00ffff; font-size: 0.85rem; margin-bottom: 8px;">⚡ 次元裂縫已開啟，前往 Suno 聖地具現化音樂：</p>
                 <a href="https://suno.com/create" target="_blank" style="text-decoration: none;">
                     <button type="button" class="retro-portal-btn">🌀 開啟次元裂縫 (前往 Suno)</button>
                 </a>
             </div>
+
             <div class="retro-monument-box">
                 <div class="scroll-header" style="color: #ffd700; margin-bottom: 10px;">🗿 【刻入公會靈感石碑】</div>
                 <div style="text-align: left; margin-bottom: 12px;">
@@ -163,6 +193,7 @@
                     🔮 刻入魔法石碑 (生成二維碼)
                 </button>
             </div>
+
             <div class="button-group retro-footer" style="margin-top: 15px;">
                 <button id="cancelToPage3Btn" class="retro-btn-escape">返回能力結算</button>
             </div>
