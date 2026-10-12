@@ -308,6 +308,124 @@ button {
 .retro-btn-escape { background: transparent; border: 2px dashed #888; color: #aaa; padding: 8px; margin-top: 0px; cursor: pointer; font-size: 0.9rem; flex: 1; text-align: center; }
 .retro-btn-escape:hover { color: #fff; border-color: #fff; }
 
+/* 🔮 答對題目時彈出的「塔羅翻牌」滿版特效樣式 */
+.unlock-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.4s ease;
+}
+.unlock-card-container {
+    width: 100%;
+    max-width: 420px;
+    padding: 20px;
+    text-align: center;
+}
+.unlock-overlay-title {
+    font-size: 1.25rem;
+    color: #ffd700;
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+}
+
+/* 🃏 3D 翻轉透視盒 */
+.unlock-perspective-box {
+    perspective: 1000px;
+    -webkit-perspective: 1000px;
+    width: 180px;
+    height: 250px;
+    margin: 0 auto 20px;
+}
+.unlock-playing-card {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform-style: preserve-3d;
+    -webkit-transform-style: preserve-3d;
+}
+.unlock-playing-card.flipped {
+    transform: rotateY(180deg) scale(1.05);
+}
+.unlock-card-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border: 3px solid #fff;
+}
+.unlock-card-back {
+    background: #000;
+    transform: rotateY(0deg);
+    -webkit-transform: rotateY(0deg);
+    z-index: 2;
+    overflow: hidden;
+}
+.unlock-card-front {
+    background: #111;
+    border-color: #ffd700;
+    transform: rotateY(180deg);
+    -webkit-transform: rotateY(180deg);
+    z-index: 1;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+.unlock-playing-card.flipped .unlock-card-front {
+    opacity: 1;
+    visibility: visible;
+    z-index: 3;
+    transition: opacity 0.4s ease 0.25s, visibility 0.4s ease 0.25s;
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.5);
+}
+.unlock-playing-card.flipped .unlock-card-back {
+    opacity: 0;
+    transition: opacity 0.3s ease 0.3s;
+}
+
+/* 塔羅牌內部精緻 8-bit 風格排版 */
+.unlock-card-inner {
+    padding: 12px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+.unlock-card-icon {
+    font-size: 3rem;
+    margin-top: 15px;
+    animation: floatingIcon 2.5s ease-in-out infinite;
+}
+.unlock-card-name {
+    font-size: 1.1rem;
+    color: #ffd700;
+    font-weight: bold;
+}
+.unlock-card-tag {
+    font-size: 0.75rem;
+    color: #00ffff;
+    background: #0000aa;
+    padding: 3px 10px;
+    border: 1px solid #00ffff;
+}
+.unlock-card-desc {
+    font-size: 0.8rem;
+    color: #ccc;
+    line-height: 1.4;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
 /* 🎴 卡牌收集與插槽樣式 */
 .card-assembly-module {
     background: #111;
