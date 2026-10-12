@@ -7,18 +7,22 @@ const page2 = document.getElementById('page2');
 const page3 = document.getElementById('page3'); 
 const page4 = document.getElementById('page4'); 
 const page5 = document.getElementById('page5'); 
+
 const appContainer = document.getElementById('appContainer');
 const startBtn = document.getElementById('startBtn');
 const startAdventureBtn = document.getElementById('startAdventureBtn'); 
 const reDrawBtn = document.getElementById('reDrawBtn');
 const nextToPage4Btn = document.getElementById('nextToPage4Btn'); 
+
 const deckArea = document.getElementById('deckArea');
 const singleCardArea = document.getElementById('singleCardArea');
 const deckCards = document.querySelectorAll('.deck-card'); 
+
 const moodCard = document.getElementById('moodCard');
 const moodImg = document.getElementById('moodImg'); 
 const moodTitle = document.getElementById('moodTitle');
 const moodDesc = document.getElementById('moodDesc');
+
 const ffCanvasContainer = document.getElementById('ff-canvas-container'); 
 const bgMusic = document.getElementById('bgMusic');
 const musicToggle = document.getElementById('musicToggle');
@@ -45,9 +49,15 @@ const moodDatabase = [
 
 // 本地備用數據
 let inspirationWall = [
-    { name: "魔法學徒小華", mood: "魔法森林", url: "https://suno.com/song/demo-1", solveScore: "5.0" }
+    { name: "魔法學徒小華", mood: "魔法森林", url: "https://suno.com/song/demo-1", solveScore: "5" }
 ];
-let adventureState = { moodTitle: "", moodPrompt: "", vocal: "", instrument: "", tonality: "", tempo: "", step: 0, eventChoice: null, solveScore: 0 };
+
+let adventureState = { 
+    moodTitle: "", moodPrompt: "", 
+    tempo: "", time_signature: "", instrument: "", sfx: "", tonality: "", 
+    dynamics: "", texture: "", form: "", vocal: "", climax: "", 
+    step: 0, eventChoice: null, solveScore: 0, finalIntegerScore: 1 
+};
 
 // 導航函數
 function showPage(pageToShow) {
@@ -148,6 +158,7 @@ if (quickPasteBtn) {
                 return;
             }
         } catch(err) {}
+        
         const manualUrl = prompt("請貼上你在 Suno 複製的歌曲分享連結：");
         if (manualUrl && manualUrl.startsWith("http")) {
             document.getElementById('sunoUrlInput').value = manualUrl.trim();
@@ -165,13 +176,15 @@ if (uploadWallBtn) {
     uploadWallBtn.addEventListener('click', async () => {
         const nameInput = document.getElementById('authorName');
         const urlInput = document.getElementById('sunoUrlInput');
+        
         const name = nameInput ? nameInput.value.trim() : "";
         let sunoUrl = urlInput ? urlInput.value.trim() : "";
+        
         if(name === "") {
             alert("🧙‍♂️ 魔法師翁sir：請確定輸入了你的學徒代號喔！");
             return;
         }
-        // 若尚未點擊載入連結，自動嘗試讀取或提示一次
+
         if(!sunoUrl || !sunoUrl.startsWith("http")) {
             try {
                 const clipText = await navigator.clipboard.readText();
@@ -181,6 +194,7 @@ if (uploadWallBtn) {
                 }
             } catch(e) {}
         }
+        
         if(!sunoUrl || !sunoUrl.startsWith("http")) {
             const promptUrl = prompt("🧙‍♂️ 魔法師翁sir：請貼上你的 Suno 歌曲分享連結：");
             if (promptUrl && promptUrl.startsWith("http")) {
@@ -191,15 +205,17 @@ if (uploadWallBtn) {
                 return;
             }
         }
-        const finalSolveScore = Math.min(adventureState.solveScore, 5).toFixed(1);
+
         uploadWallBtn.disabled = true;
         uploadWallBtn.innerText = "⏳ 正在刻入試算表石碑...";
+
         const payload = {
             name: name,
             mood: adventureState.moodTitle,
             url: sunoUrl,
-            solveScore: finalSolveScore
+            solveScore: adventureState.finalIntegerScore.toString()
         };
+
         try {
             await fetch(GAS_API_URL, {
                 method: "POST",
@@ -259,12 +275,14 @@ if (restartAdventureBtn) restartAdventureBtn.addEventListener('click', resetApp)
 
 if (nextToPage4Btn) {
     nextToPage4Btn.addEventListener('click', () => {
-        const promptText = `A high quality music track for ${adventureState.moodTitle}. ${adventureState.vocal}. Main instruments featuring ${adventureState.instrument}. ${adventureState.tonality}, ${adventureState.tempo}. Atmosphere: ${adventureState.moodPrompt}.`;
+        // 更新了符合 10 個維度的 Prompt 組合
+        const promptText = `A high quality music track for ${adventureState.moodTitle}. ${adventureState.vocal}. Main instruments featuring ${adventureState.instrument}. ${adventureState.tonality}, ${adventureState.tempo}, ${adventureState.time_signature}. Dynamics: ${adventureState.dynamics}. Texture: ${adventureState.texture}. Form: ${adventureState.form}. Climax: ${adventureState.climax}. Atmosphere: ${adventureState.moodPrompt}. Additional SFX: ${adventureState.sfx}.`;
+        
         const promptEl = document.getElementById('resultPrompt');
         if (promptEl) promptEl.innerText = promptText;
         showPage(page4); 
         
-        const ritualDialogue = `「現在，將你調配出的這段咒語帶去 Suno AI 聖地吧。生成音樂後，別忘了回來把它刻在靈感石碑上！」`;
+        const ritualDialogue = `「現在，將你調配出的這段完整咒語帶去 Suno AI 聖地吧。生成音樂後，別忘了回來把它刻在靈感石碑上！」`;
         const ritualTextEl = document.getElementById('ritualText');
         if (ritualTextEl) typeWriterEffect(ritualTextEl, ritualDialogue, 30);
     });
@@ -333,6 +351,7 @@ function playSpellSound(type) {
             o.connect(g); g.connect(audioCtx.destination);
             o.start(startTime); o.stop(startTime + duration);
         }
+        
         switch (type) {
             case 'Strings': playTone(440, 'sawtooth', now, 1.2, 0.05); playTone(659.25, 'sawtooth', now, 1.2, 0.05); break;
             case 'Woodwinds': playTone(1046.50, 'sine', now, 0.8, 0.1); break;
@@ -355,109 +374,156 @@ function playSpellSound(type) {
 }
 
 // =========================================
-// 📜 主題情境配樂引導劇本
+// 📜 主題情境配樂引導劇本 (擴展為 10題 + 1事件 = 12階段)
 // =========================================
 const rpgFlow = [
     {
         systemText: "【系統提示】你推開了魔法公會沉重的木門，煙霧瀰漫...",
-        getDialogue: () => `翁sir 扶了扶眼鏡，親切地笑道：「歡迎你，小小配樂家！你抽到了『${adventureState.moodTitle}』命運卡！要為這個場景譜寫出完美的音樂，我們必須像真正的作曲家一樣，思考節奏、音色與調性。準備好接受我的配樂引導了嗎？」`,
+        getDialogue: () => `翁sir 扶了扶眼鏡，親切地笑道：「歡迎你，小小配樂家！你抽到了『${adventureState.moodTitle}』命運卡！要為這個場景譜寫出完美的音樂，我們必須進行 10 道魔法考驗。準備好接受我的引導了嗎？」`,
         choices: [{ text: "我準備好了，翁sir！", nextStep: 1 }]
     },
-    {
-        systemText: "【第一道配樂考驗：場景步伐與節奏】",
-        getDialogue: () => `翁sir 問道：「首先，閉上眼睛想像『${adventureState.moodTitle}』的畫面。如果這是一部電影，裡面的主角步伐與場景流動應該是怎樣的速度？」`,
+    { // Q1
+        systemText: "【第一道配樂考驗：速度 (Tempo)】",
+        getDialogue: () => `翁sir 問道：「首先，想像『${adventureState.moodTitle}』的畫面。主角的步伐與場景流動應該是怎樣的速度？」`,
         choices: [
-            { text: "🐢 沉靜緩慢 (慢板 Adagio)", value: "Slow tempo (Adagio), 60 BPM", nextStep: 2, key: "tempo", sound: "Slow tempo", 
-              action: () => evaluateStep('tempo', 'Slow tempo (Adagio), 60 BPM') },
-            { text: "🚶 悠閒漫步 (行板 Andante)", value: "Moderate tempo (Andante), 85 BPM", nextStep: 2, key: "tempo", sound: "Moderate tempo", 
-              action: () => evaluateStep('tempo', 'Moderate tempo (Andante), 85 BPM') },
-            { text: "🏃 歡樂奔馳 (快板 Allegro)", value: "Fast tempo (Allegro), 130 BPM", nextStep: 2, key: "tempo", sound: "Fast tempo", 
-              action: () => evaluateStep('tempo', 'Fast tempo (Allegro), 130 BPM') }
+            { text: "🐢 沉靜緩慢 (慢板 Adagio)", value: "Slow tempo (Adagio), 60 BPM", nextStep: 2, key: "tempo", sound: "Slow tempo", action: () => evaluateStep('tempo', 'Slow tempo') },
+            { text: "🚶 悠閒漫步 (行板 Andante)", value: "Moderate tempo (Andante), 85 BPM", nextStep: 2, key: "tempo", sound: "Moderate tempo", action: () => evaluateStep('tempo', 'Moderate tempo') },
+            { text: "🏃 歡樂奔馳 (快板 Allegro)", value: "Fast tempo (Allegro), 130 BPM", nextStep: 2, key: "tempo", sound: "Fast tempo", action: () => evaluateStep('tempo', 'Fast tempo') }
         ]
     },
-    {
-        systemText: "【第二道配樂考驗：場景靈魂樂器】",
-        getDialogue: () => {
-            return `翁sir 讚許道：「很好的節奏設定！聽聽這節拍，『${adventureState.moodTitle}』的律動感立刻出來了！<br><br>接下來是【音色法器】。要描繪這個故事，哪一種樂器家族最能代表你的主角音色？」`;
-        },
+    { // Q2
+        systemText: "【第二道配樂考驗：拍號 (Time Signature)】",
+        getDialogue: () => `翁sir 點點頭：「節拍決定了律動的感覺。你覺得這個故事的舞步是哪種節拍？」`,
         choices: [
-            { text: "🎻 弦樂家族 (提琴)", value: "Strings", nextStep: 3, key: "instrument", sound: "Strings", action: () => evaluateStep('instrument', 'Strings') },
-            { text: "🌬️ 木管家族 (長笛)", value: "Woodwinds", nextStep: 3, key: "instrument", sound: "Woodwinds", action: () => evaluateStep('instrument', 'Woodwinds') },
-            { text: "🎺 銅管家族 (小號)", value: "Brass", nextStep: 3, key: "instrument", sound: "Brass", action: () => evaluateStep('instrument', 'Brass') },
-            { text: "🎹 鍵盤法器 (鋼琴)", value: "Piano", nextStep: 3, key: "instrument", sound: "Piano", action: () => evaluateStep('instrument', 'Piano') }
+            { text: "⚖️ 穩定行進 (4/4拍)", value: "4/4 time signature", nextStep: 3, key: "time_signature", action: () => evaluateStep('time_signature', '4/4') },
+            { text: "💃 旋轉圓舞曲 (3/4拍)", value: "3/4 time signature (Waltz)", nextStep: 3, key: "time_signature", action: () => evaluateStep('time_signature', '3/4') },
+            { text: "🪖 活潑進行曲 (2/4拍)", value: "2/4 time signature (March)", nextStep: 3, key: "time_signature", action: () => evaluateStep('time_signature', '2/4') }
         ]
     },
-    {
+    { // Q3
+        systemText: "【第三道配樂考驗：樂器家族 (Instrument)】",
+        getDialogue: () => `「很好！接下來是【音色法器】。要描繪這個故事，哪一種樂器家族最能代表你的主角音色？」`,
+        choices: [
+            { text: "🎻 弦樂家族 (溫暖連綿)", value: "Strings", nextStep: 4, key: "instrument", sound: "Strings", action: () => evaluateStep('instrument', 'Strings') },
+            { text: "🌬️ 木管家族 (空靈清脆)", value: "Woodwinds", nextStep: 4, key: "instrument", sound: "Woodwinds", action: () => evaluateStep('instrument', 'Woodwinds') },
+            { text: "🎺 銅管家族 (輝煌宏大)", value: "Brass", nextStep: 4, key: "instrument", sound: "Brass", action: () => evaluateStep('instrument', 'Brass') },
+            { text: "🎹 鍵盤法器 (靈動敲擊)", value: "Piano", nextStep: 4, key: "instrument", sound: "Piano", action: () => evaluateStep('instrument', 'Piano') }
+        ]
+    },
+    { // 突發事件 (Step 4)
         systemText: "【突發事件！】魔法大釜劇烈抖動！",
         getDialogue: () => `「不好！法器注入的魔力與『${adventureState.moodTitle}』產生了強烈共鳴，法陣快要失控了！快幫我選擇應對魔法！」`,
         choices: [
-            { text: "🔥 施放火球術", nextStep: 4, action: () => { adventureState.eventChoice = "fire"; playSpellSound("fire"); } },
-            { text: "❄️ 施放冰凍術", nextStep: 4, action: () => { adventureState.eventChoice = "ice"; playSpellSound("ice"); } },
-            { text: "🎵 演奏舒緩音階", nextStep: 4, action: () => { adventureState.eventChoice = "music"; playSpellSound("music"); } }
+            { text: "🔥 施放火球術", nextStep: 5, action: () => { adventureState.eventChoice = "fire"; playSpellSound("fire"); } },
+            { text: "❄️ 施放冰凍術", nextStep: 5, action: () => { adventureState.eventChoice = "ice"; playSpellSound("ice"); } },
+            { text: "🎵 演奏舒緩音階", nextStep: 5, action: () => { adventureState.eventChoice = "music"; playSpellSound("music"); } }
         ]
     },
-    {
-        systemText: "【第三道配樂考驗：故事的光影色彩】",
+    { // Q4
+        systemText: "【第四道配樂考驗：環境音效 (SFX)】",
         getDialogue: () => {
             let ev = adventureState.eventChoice === "fire" ? "「哇啊！差點把鬍子燒焦了，但總算穩定了！」" :
                      adventureState.eventChoice === "ice" ? "「呼... 結了一層霜，魔力終於冷靜下來了！」" : "「精采！溫和的音階讓暴躁的魔力瞬間安靜了！」";
-            return `${ev}<br><br>「化險為夷！第三道咒語是【光影色彩】。你希望『${adventureState.moodTitle}』帶給聽眾什麼樣的情緒色彩？聽聽看這些和弦的聲音！」`;
+            return `${ev}<br><br>「化險為夷！現在，你想在背景中加入什麼聲音來增添環境魔法？」`;
         },
         choices: [
-            { text: "☀️ 光明大調 (Major Key)", value: "composed in Major Key", nextStep: 5, key: "tonality", sound: "Major Key", action: () => evaluateStep('tonality', 'composed in Major Key') },
-            { text: "🌑 暗影小調 (Minor Key)", value: "composed in Minor Key", nextStep: 5, key: "tonality", sound: "Minor Key", action: () => evaluateStep('tonality', 'composed in Minor Key') },
-            { text: "🌟 星光音階 (Pentatonic)", value: "composed in Pentatonic Scale", nextStep: 5, key: "tonality", sound: "Pentatonic", action: () => evaluateStep('tonality', 'composed in Pentatonic Scale') }
+            { text: "🍃 微風與樹葉沙沙聲", value: "Nature sounds, gentle wind and rustling leaves", nextStep: 6, key: "sfx", action: () => evaluateStep('sfx', 'Nature') },
+            { text: "🐦 鳥鳴與森林蟲鳴聲", value: "Ambient bird chirping and forest sounds", nextStep: 6, key: "sfx", action: () => evaluateStep('sfx', 'Nature') },
+            { text: "✨ 閃閃發光的魔法音效", value: "Sparkling magic sound effects, chime sparkles", nextStep: 6, key: "sfx", action: () => evaluateStep('sfx', 'Magic') }
         ]
     },
-    {
-        systemText: "【第四道配樂考驗：聲音精靈與敘事】",
-        getDialogue: () => {
-            return `翁sir 瞇起眼睛：「這個調性太貼切了！完美烘托出『${adventureState.moodTitle}』的情感深淺！<br><br>最後一道咒語是【靈魂之聲】。這部配樂需要人類精靈唱出歌詞，還是純樂器電影原聲帶？」`;
-        },
+    { // Q5
+        systemText: "【第五道配樂考驗：調性色彩 (Tonality)】",
+        getDialogue: () => `「完美的點綴！接下來是【光影色彩】。你希望這首配樂帶給聽眾什麼樣的情緒色彩？聽聽看這些和弦的聲音！」`,
         choices: [
-            { text: "純樂器魔法", value: "Instrumental only, no vocals", nextStep: 6, key: "vocal", action: () => adventureState.solveScore += 0.5 },
-            { text: "男聲精靈 (男聲)", value: "Featuring a male lead vocalist", nextStep: 6, key: "vocal", action: () => adventureState.solveScore += 0.5 },
-            { text: "女聲精靈 (女聲)", value: "Featuring a female lead vocalist", nextStep: 6, key: "vocal", action: () => adventureState.solveScore += 0.5 }
+            { text: "☀️ 光明大調 (Major Key)", value: "composed in Major Key", nextStep: 7, key: "tonality", sound: "Major Key", action: () => evaluateStep('tonality', 'Major') },
+            { text: "🌑 暗影小調 (Minor Key)", value: "composed in Minor Key", nextStep: 7, key: "tonality", sound: "Minor Key", action: () => evaluateStep('tonality', 'Minor') },
+            { text: "🌟 星光音階 (Pentatonic)", value: "composed in Pentatonic Scale", nextStep: 7, key: "tonality", sound: "Pentatonic", action: () => evaluateStep('tonality', 'Pentatonic') }
+        ]
+    },
+    { // Q6
+        systemText: "【第六道配樂考驗：力度變化 (Dynamics)】",
+        getDialogue: () => `翁sir 滿意地說：「這調性太棒了！那麼，音樂的能量強弱決定了張力，這首曲子的整體力量感應該如何？」`,
+        choices: [
+            { text: "🤫 輕柔神祕 (Piano, p)", value: "Soft dynamics (Piano)", nextStep: 8, key: "dynamics", action: () => evaluateStep('dynamics', 'Piano') },
+            { text: "🗣️ 溫和流暢 (Mezzo-forte, mf)", value: "Moderate dynamics (Mezzo-forte)", nextStep: 8, key: "dynamics", action: () => evaluateStep('dynamics', 'Mezzo-forte') },
+            { text: "📢 強烈震撼 (Forte, f)", value: "Loud and powerful dynamics (Forte)", nextStep: 8, key: "dynamics", action: () => evaluateStep('dynamics', 'Forte') }
+        ]
+    },
+    { // Q7
+        systemText: "【第七道配樂考驗：織體層次 (Texture)】",
+        getDialogue: () => `「力度控制得很好！魔法陣的結構需要確立，你希望音樂的層次是單純還是複雜？」`,
+        choices: [
+            { text: "🧵 單一旋律 (單音音樂)", value: "Monophonic texture, single clear melody", nextStep: 9, key: "texture", action: () => evaluateStep('texture', 'Monophonic') },
+            { text: "🧶 旋律配和弦 (主音音樂)", value: "Homophonic texture, melody with chordal accompaniment", nextStep: 9, key: "texture", action: () => evaluateStep('texture', 'Homophonic') },
+            { text: "🕸️ 多聲部交織 (複音音樂)", value: "Polyphonic texture, complex weaving melodies", nextStep: 9, key: "texture", action: () => evaluateStep('texture', 'Polyphonic') }
+        ]
+    },
+    { // Q8
+        systemText: "【第八道配樂考驗：曲式結構 (Form)】",
+        getDialogue: () => `「故事的發展需要藍圖。你想讓這首配樂依照什麼結構進行？」`,
+        choices: [
+            { text: "🔄 三段體 (ABA 結構)", value: "ABA Ternary form", nextStep: 10, key: "form", action: () => evaluateStep('form', 'ABA') },
+            { text: "📖 主題與變奏 (變奏曲)", value: "Theme and Variation form", nextStep: 10, key: "form", action: () => evaluateStep('form', 'Theme') },
+            { text: "🔁 迴旋曲式 (Rondo)", value: "Rondo form", nextStep: 10, key: "form", action: () => evaluateStep('form', 'Rondo') }
+        ]
+    },
+    { // Q9
+        systemText: "【第九道配樂考驗：人聲精靈 (Vocal/Inst)】",
+        getDialogue: () => `翁sir 瞇起眼睛：「大功告成一大半了！這部配樂需要人類精靈唱出歌詞，還是純粹的樂器原聲帶？」`,
+        choices: [
+            { text: "純樂器魔法 (無人聲)", value: "Instrumental only, no vocals", nextStep: 11, key: "vocal", action: () => evaluateStep('vocal', 'None') },
+            { text: "男聲精靈吟唱", value: "Featuring a male lead vocalist", nextStep: 11, key: "vocal", action: () => evaluateStep('vocal', 'Male') },
+            { text: "女聲精靈吟唱", value: "Featuring a female lead vocalist", nextStep: 11, key: "vocal", action: () => evaluateStep('vocal', 'Female') }
+        ]
+    },
+    { // Q10
+        systemText: "【第十道配樂考驗：情感高潮 (Climax)】",
+        getDialogue: () => `「來到最後一道咒語！在樂曲的結尾，你希望帶給聽眾什麼樣的感受？」`,
+        choices: [
+            { text: "🌅 漸強後爆發的壯闊結尾", value: "Epic crescendo climax at the end", nextStep: 12, key: "climax", action: () => evaluateStep('climax', 'Epic') },
+            { text: "🌫️ 漸弱後消失在迷霧的收尾", value: "Fading out softly (Diminuendo) ending", nextStep: 12, key: "climax", action: () => evaluateStep('climax', 'Fade') },
+            { text: "🎢 突強突弱的驚喜反轉", value: "Sudden dynamic shifts and surprise ending", nextStep: 12, key: "climax", action: () => evaluateStep('climax', 'Surprise') }
         ]
     }
 ];
 
+// 10 題核心演算法：給予原始積點 (+1 或 +0)
 function evaluateStep(type, selectedValue) {
     const title = adventureState.moodTitle;
-    let score = 0.5;
+    let point = 0;
+
     if (type === 'tempo') {
-        if (["快樂動物園", "遊樂園探險", "熱血運動會", "闖關遊戲", "生日派對"].includes(title)) {
-            if (selectedValue.includes("Fast")) score = 1.5;
-            else if (selectedValue.includes("Moderate")) score = 1.0;
-        } else if (["甜甜夢鄉", "下雨的窗邊", "海底世界"].includes(title)) {
-            if (selectedValue.includes("Slow")) score = 1.5;
-            else if (selectedValue.includes("Moderate")) score = 1.0;
-        } else {
-            if (selectedValue.includes("Moderate")) score = 1.5;
-            else score = 1.0;
-        }
+        if (["快樂動物園", "遊樂園探險", "熱血運動會", "闖關遊戲", "生日派對"].includes(title) && selectedValue.includes("Fast")) point = 1;
+        else if (["甜甜夢鄉", "下雨的窗邊", "海底世界"].includes(title) && selectedValue.includes("Slow")) point = 1;
+        else if (["魔法森林", "宇宙探險"].includes(title) && selectedValue.includes("Moderate")) point = 1;
+    } else if (type === 'time_signature') {
+        if (["遊樂園探險", "甜甜夢鄉", "魔法森林"].includes(title) && selectedValue.includes("3/4")) point = 1;
+        else if (["熱血運動會", "闖關遊戲", "宇宙探險"].includes(title) && selectedValue.includes("4/4")) point = 1;
+        else if (selectedValue.includes("2/4") || selectedValue.includes("4/4")) point = 1; 
     } else if (type === 'instrument') {
-        if (title === "下雨的窗邊" || title === "甜甜夢鄉") {
-            if (selectedValue === "Piano" || selectedValue === "Strings") score = 1.5;
-        } else if (title === "熱血運動會" || title === "遊樂園探險") {
-            if (selectedValue === "Brass") score = 1.5;
-        } else if (title === "快樂動物園" || title === "海底世界" || title === "魔法森林") {
-            if (selectedValue === "Woodwinds") score = 1.5;
-        } else {
-            score = 1.0;
-        }
+        if (["下雨的窗邊", "甜甜夢鄉"].includes(title) && selectedValue === "Strings") point = 1;
+        else if (["熱血運動會", "遊樂園探險"].includes(title) && selectedValue === "Brass") point = 1;
+        else if (["快樂動物園", "海底世界", "魔法森林"].includes(title) && selectedValue === "Woodwinds") point = 1;
+        else if (["闖關遊戲", "生日派對", "宇宙探險"].includes(title) && selectedValue === "Piano") point = 1;
+    } else if (type === 'sfx') {
+        if (["魔法森林", "快樂動物園", "下雨的窗邊"].includes(title) && selectedValue.includes("Nature")) point = 1;
+        else if (["宇宙探險", "魔法森林", "海底世界"].includes(title) && selectedValue.includes("Magic")) point = 1;
+        else point = 1; 
     } else if (type === 'tonality') {
-        if (["快樂動物園", "遊樂園探險", "生日派對", "熱血運動會"].includes(title)) {
-            if (selectedValue.includes("Major")) score = 1.5;
-        } else if (["下雨的窗邊", "宇宙探險", "闖關遊戲"].includes(title)) {
-            if (selectedValue.includes("Minor")) score = 1.5;
-        } else if (["魔法森林", "甜甜夢鄉", "海底世界"].includes(title)) {
-            if (selectedValue.includes("Pentatonic")) score = 1.5;
-        } else {
-            score = 1.0;
-        }
+        if (["快樂動物園", "遊樂園探險", "生日派對", "熱血運動會"].includes(title) && selectedValue.includes("Major")) point = 1;
+        else if (["下雨的窗邊", "宇宙探險", "闖關遊戲"].includes(title) && selectedValue.includes("Minor")) point = 1;
+        else if (["魔法森林", "甜甜夢鄉", "海底世界"].includes(title) && selectedValue.includes("Pentatonic")) point = 1;
+    } else if (type === 'dynamics') {
+        if (["甜甜夢鄉", "下雨的窗邊", "海底世界"].includes(title) && selectedValue.includes("Piano")) point = 1;
+        else if (["熱血運動會", "闖關遊戲", "宇宙探險"].includes(title) && selectedValue.includes("Forte")) point = 1;
+        else if (["快樂動物園", "遊樂園探險", "魔法森林", "生日派對"].includes(title) && selectedValue.includes("Mezzo-forte")) point = 1;
+    } else if (['texture', 'form', 'vocal', 'climax'].includes(type)) {
+        // 進階維度：只要學生能合理選擇即給予鼓勵分 1 點
+        point = 1; 
     }
-    adventureState.solveScore += score;
+
+    adventureState.solveScore += point;
 }
 
 // 打字機引擎
@@ -505,12 +571,13 @@ function renderRPGStep(stepIndex) {
                 if (choice.key) adventureState[choice.key] = choice.value;
                 if (choice.sound) playSpellSound(choice.sound);
                 
-                choice.nextStep === 6 ? triggerEvaluationReveal() : renderRPGStep(choice.nextStep);
+                choice.nextStep === 12 ? triggerEvaluationReveal() : renderRPGStep(choice.nextStep);
             });
             choicesContainer.appendChild(btn);
         });
         choicesContainer.style.display = 'grid'; 
     };
+
     if (currentStep.systemText) {
         if (systemBox) systemBox.style.display = 'block';
         typeWriterEffect(systemBox, currentStep.systemText, 30, () => {
@@ -522,6 +589,7 @@ function renderRPGStep(stepIndex) {
     }
 }
 
+// 結算與 1-5 分整數轉換邏輯
 function triggerEvaluationReveal() {
     if (ffCanvasContainer) ffCanvasContainer.style.opacity = "0"; 
     
@@ -530,12 +598,26 @@ function triggerEvaluationReveal() {
         setTimeout(() => appContainer.classList.remove('screen-shake'), 600);
     }
     playRitualFanfare();
-    const finalScore = Math.min(adventureState.solveScore, 5).toFixed(1);
+    
+    // 原始積點轉換為 1-5 分
+    const pts = adventureState.solveScore;
+    let finalIntScore = 1;
+    let titleText = "初心體驗者";
+    
+    if (pts >= 9) { finalIntScore = 5; titleText = "傳奇配樂神童"; }
+    else if (pts >= 7) { finalIntScore = 4; titleText = "高級音效法師"; }
+    else if (pts >= 5) { finalIntScore = 3; titleText = "合格配樂學徒"; }
+    else if (pts >= 3) { finalIntScore = 2; titleText = "見習魔法生"; }
+    else { finalIntScore = 1; titleText = "初心體驗者"; }
+    
+    adventureState.finalIntegerScore = finalIntScore;
+
     const scoreEl = document.getElementById('problemSolvingScore');
-    if (scoreEl) scoreEl.innerText = `${finalScore} / 5 分`;
+    if (scoreEl) scoreEl.innerText = `${finalIntScore} / 5 分`;
+    
     showPage(page3); 
     
-    const evalDialogue = `「太棒了！你的樂理探究旅程已經完成，我們來看看你獲得了幾分音樂法力吧！」`;
+    const evalDialogue = `「太棒了！你完美完成了 10 道考驗。根據你的樂理直覺，我授與你【${titleText}】的階級！現在前往魔法公會領取你的完整咒語吧！」`;
     const evalTextEl = document.getElementById('evalTutorText');
     if (evalTextEl) typeWriterEffect(evalTextEl, evalDialogue, 30);
 }
@@ -568,6 +650,7 @@ function renderWall() {
         wall.innerHTML = "<p style='color:#94a3b8; grid-column: 1/-1;'>石碑上尚未刻入任何咒語，成為第一位魔法音樂學徒吧！</p>";
         return;
     }
+    
     [...inspirationWall].reverse().forEach((item, index) => {
         const card = document.createElement('div');
         card.className = "wall-item";
@@ -575,7 +658,7 @@ function renderWall() {
             <h4>${item.name} 的作品</h4>
             <p class="wall-mood">🔮主題：${item.mood}</p>
             <div style="font-size: 0.8rem; background: rgba(0,0,0,0.4); padding: 8px; border-radius: 6px; margin-bottom: 12px; text-align: left; border-left: 3px solid #00ffff;">
-                <p style="margin-bottom:0; color: #e0f2fe;">🔍 探究解難能力: ${item.solveScore} / 5 分</p>
+                <p style="margin-bottom:0; color: #e0f2fe;">🔍 能力評核: ${item.solveScore} / 5 分</p>
             </div>
             <div class="qr-wrapper"><canvas id="qr-${index}" class="qr-canvas"></canvas></div>
             
@@ -596,7 +679,12 @@ function renderWall() {
 
 function resetApp() {
     if (ffCanvasContainer) ffCanvasContainer.style.opacity = "1"; 
-    adventureState = { moodTitle: "", moodPrompt: "", vocal: "", instrument: "", tonality: "", tempo: "", step: 0, eventChoice: null, solveScore: 0 };
+    adventureState = { 
+        moodTitle: "", moodPrompt: "", 
+        tempo: "", time_signature: "", instrument: "", sfx: "", tonality: "", 
+        dynamics: "", texture: "", form: "", vocal: "", climax: "", 
+        step: 0, eventChoice: null, solveScore: 0, finalIntegerScore: 1 
+    };
     
     if (moodCard) moodCard.classList.remove('flipped');
     if (reDrawBtn) reDrawBtn.classList.add('hidden-btn');
@@ -655,18 +743,21 @@ function initFF3DBackground() {
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         container.innerHTML = '';
         container.appendChild(renderer.domElement);
+
         const crystalGeo = new THREE.OctahedronGeometry(110, 0);
         const crystalMat = new THREE.MeshBasicMaterial({
             color: 0x67e8f9, wireframe: true, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending
         });
         crystalMesh = new THREE.Mesh(crystalGeo, crystalMat);
         scene.add(crystalMesh);
+
         const innerGeo = new THREE.OctahedronGeometry(75, 0);
         const innerMat = new THREE.MeshBasicMaterial({
             color: 0xd946ef, transparent: true, opacity: 0.3, blending: THREE.AdditiveBlending
         });
         const innerCrystal = new THREE.Mesh(innerGeo, innerMat);
         crystalMesh.add(innerCrystal);
+
         outerRingsGroup = new THREE.Group();
         const ringConfigs = [
             { radius: 210, width: 12, color: 0x38bdf8, rx: 1.1, ry: 0.3 },
@@ -684,6 +775,7 @@ function initFF3DBackground() {
             outerRingsGroup.add(ring);
         });
         scene.add(outerRingsGroup);
+
         const starCount = 1200;
         const starGeo = new THREE.BufferGeometry();
         const starPos = new Float32Array(starCount * 3);
@@ -704,6 +796,7 @@ function initFF3DBackground() {
         });
         starField = new THREE.Points(starGeo, starMat);
         scene.add(starField);
+
         const waveGeo = new THREE.PlaneGeometry(1600, 1000, 32, 24);
         const waveMat = new THREE.MeshBasicMaterial({
             color: 0x1e3a8a, wireframe: true, transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending
@@ -712,6 +805,7 @@ function initFF3DBackground() {
         waveMesh.rotation.x = -Math.PI / 2.3;
         waveMesh.position.y = -260;
         scene.add(waveMesh);
+
         window.addEventListener('mousemove', (e) => {
             mouseX = (e.clientX - window.innerWidth / 2) * 0.2;
             mouseY = (e.clientY - window.innerHeight / 2) * 0.2;
