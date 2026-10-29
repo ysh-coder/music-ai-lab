@@ -5,14 +5,23 @@ const page1 = document.getElementById('page1');
 const pageCard = document.getElementById('page-card'); 
 const page2 = document.getElementById('page2');
 const page3 = document.getElementById('page3'); 
-const page4 = document.getElementById('page4'); 
-const page5 = document.getElementById('page5'); 
+const page4 = document.getElementById('page4');           // 階段 1：卡牌融合
+const pageSpell = document.getElementById('page-spell');   // 階段 2：咒語與 Suno
+const pageMonument = document.getElementById('page-monument'); // 階段 3：石碑登記
+const page5 = document.getElementById('page5');           // 階段 4：靈感牆
 
 const appContainer = document.getElementById('appContainer');
 const startBtn = document.getElementById('startBtn');
 const startAdventureBtn = document.getElementById('startAdventureBtn'); 
 const reDrawBtn = document.getElementById('reDrawBtn');
+
+// 導航跳轉按鈕
 const nextToPage4Btn = document.getElementById('nextToPage4Btn'); 
+const nextToSpellPageBtn = document.getElementById('nextToSpellPageBtn');
+const nextToMonumentPageBtn = document.getElementById('nextToMonumentPageBtn');
+const backToPage4Btn = document.getElementById('backToPage4Btn');
+const backToSpellBtn = document.getElementById('backToSpellBtn');
+const cancelToPage3Btn = document.getElementById('cancelToPage3Btn');
 
 const deckArea = document.getElementById('deckArea');
 const singleCardArea = document.getElementById('singleCardArea');
@@ -28,7 +37,7 @@ const bgMusic = document.getElementById('bgMusic');
 const musicToggle = document.getElementById('musicToggle');
 let isMusicPlaying = false; 
 
-// 🆕 新增：答對解鎖卡牌的 3D 彈出層綁定
+// 答對解鎖卡牌的 3D 彈出層綁定
 const cardUnlockOverlay = document.getElementById('cardUnlockOverlay');
 const unlockTarotCard = document.getElementById('unlockTarotCard');
 const unlockCardIcon = document.getElementById('unlockCardIcon');
@@ -37,10 +46,9 @@ const unlockCardTag = document.getElementById('unlockCardTag');
 const unlockCardDesc = document.getElementById('unlockCardDesc');
 const confirmUnlockBtn = document.getElementById('confirmUnlockBtn');
 
-// 用於解鎖流程的下一個 RPG 關卡快照
 let nextStepIndexAfterUnlock = null;
 
-// 🔗 您的 Google Apps Script 雲端數據庫 API 網址
+// 🔗 Google Apps Script 雲端數據庫 API 網址
 const GAS_API_URL = "https://script.google.com/macros/s/AKfycbw6ks-67_DiwUgci6kTyDeBjOOwWCl07kQR_K0awfEd9o98NhKCJMSLEawqmzB1UTJk/exec";
 
 // =========================================
@@ -70,13 +78,13 @@ let adventureState = {
     tempo: "", time_signature: "", instrument: "", sfx: "", tonality: "", 
     dynamics: "", texture: "", form: "", vocal: "", climax: "", 
     step: 0, eventChoice: null, solveScore: 0, finalIntegerScore: 1,
-    collectedCards: [], // 收集到的像素音樂卡牌
-    placedCards: []     // 已注入魔法陣的卡牌
+    collectedCards: [],
+    placedCards: []
 };
 
-// 導航函數
+// 導航函數 (支援全新 3 個獨立頁面)
 function showPage(pageToShow) {
-    [page1, pageCard, page2, page3, page4, page5].forEach(p => { 
+    [page1, pageCard, page2, page3, page4, pageSpell, pageMonument, page5].forEach(p => { 
         if (p) { p.classList.remove('active'); p.classList.add('hidden'); }
     });
     if (pageToShow) {
@@ -146,19 +154,56 @@ if (startAdventureBtn) {
     });
 }
 
+// =================================================================
+// 🔀 獨立頁面之間的導航與轉場邏輯
+// =================================================================
+
+// Page 3 -> Page 4 (進入階段 1：卡牌融合)
+if (nextToPage4Btn) {
+    nextToPage4Btn.addEventListener('click', () => {
+        showPage(page4);
+        initCardAssemblyPage();
+    });
+}
+
+// Page 4 -> Page-Spell (進入階段 2：領取咒語與前往 Suno)
+if (nextToSpellPageBtn) {
+    nextToSpellPageBtn.addEventListener('click', () => {
+        showPage(pageSpell);
+        generateFinalPromptText();
+    });
+}
+
+// Page-Spell -> Page-Monument (進入階段 3：石碑登記)
+if (nextToMonumentPageBtn) {
+    nextToMonumentPageBtn.addEventListener('click', () => {
+        showPage(pageMonument);
+    });
+}
+
+// 返回按鈕
+if (backToPage4Btn) backToPage4Btn.addEventListener('click', () => showPage(page4));
+if (backToSpellBtn) backToSpellBtn.addEventListener('click', () => showPage(pageSpell));
+if (cancelToPage3Btn) cancelToPage3Btn.addEventListener('click', () => showPage(page3));
+
+// 複製咒語按鈕
 const copyPromptBtn = document.getElementById('copyPromptBtn');
 if (copyPromptBtn) {
     copyPromptBtn.addEventListener('click', () => {
         const promptEl = document.getElementById('resultPrompt');
         if (promptEl) {
             navigator.clipboard.writeText(promptEl.innerText);
-            copyPromptBtn.innerText = "✅ 抄寫成功！";
-            setTimeout(() => copyPromptBtn.innerText = "📋 抄寫咒語 (複製)", 2000);
+            copyPromptBtn.innerText = "✅ 複製成功！請點步驟 2 開啟 Suno！";
+            copyPromptBtn.style.background = "#4ade80";
+            setTimeout(() => {
+                copyPromptBtn.innerText = "📋 步驟 1：點此抄寫咒語 (複製到剪貼簿)";
+                copyPromptBtn.style.background = "#ffd700";
+            }, 3000);
         }
     });
 }
 
-// 🔗 快捷載入剪貼簿連結
+// 快捷載入剪貼簿連結
 const quickPasteBtn = document.getElementById('quickPasteBtn');
 if (quickPasteBtn) {
     quickPasteBtn.addEventListener('click', async () => {
@@ -185,7 +230,7 @@ if (quickPasteBtn) {
     });
 }
 
-// 🔮 點擊上傳作品至 Google 試算表
+// 上傳作品至 Google 試算表並生成 QR Code
 const uploadWallBtn = document.getElementById('uploadWallBtn');
 if (uploadWallBtn) {
     uploadWallBtn.addEventListener('click', async () => {
@@ -196,7 +241,7 @@ if (uploadWallBtn) {
         let sunoUrl = urlInput ? urlInput.value.trim() : "";
         
         if(name === "") {
-            alert("🧙‍♂️ 魔法師翁sir：請確定輸入了你的學徒代號喔！");
+            alert("🧙‍♂️ 魔法師翁sir：請輸入你的學徒姓名與班別（例如：1A 陳大文）喔！");
             return;
         }
 
@@ -216,13 +261,13 @@ if (uploadWallBtn) {
                 sunoUrl = promptUrl.trim();
                 if (urlInput) urlInput.value = sunoUrl;
             } else {
-                alert("🧙‍♂️ 魔法師翁sir：需要有 Suno 歌曲連結才能生成二維碼與刻入石碑喔！");
+                alert("🧙‍♂️ 魔法師翁sir：需要有 Suno 歌曲連結才能生成二維碼刻入石碑喔！");
                 return;
             }
         }
 
         uploadWallBtn.disabled = true;
-        uploadWallBtn.innerText = "⏳ 正在刻入試算表石碑...";
+        uploadWallBtn.innerText = "⏳ 正在刻入公會石碑...";
 
         const payload = {
             name: name,
@@ -244,17 +289,17 @@ if (uploadWallBtn) {
                 await fetchWallData(); 
                 showPage(page5);
                 uploadWallBtn.disabled = false;
-                uploadWallBtn.innerText = "🔮 刻入魔法石碑 (生成二維碼)";
+                uploadWallBtn.innerText = "🔮 刻入魔法石碑 (生成 QR Code)";
             }, 800);
         } catch(e) {
             alert("⚡ 魔法傳輸受阻：寫入試算表失敗，請檢查網路連線。");
             uploadWallBtn.disabled = false;
-            uploadWallBtn.innerText = "🔮 刻入魔法石碑 (生成二維碼)";
+            uploadWallBtn.innerText = "🔮 刻入魔法石碑 (生成 QR Code)";
         }
     });
 }
 
-// 🃏 重新抽卡
+// 重新抽卡
 if (reDrawBtn) {
     reDrawBtn.addEventListener('click', () => {
         if (moodCard) moodCard.classList.remove('flipped');
@@ -283,37 +328,16 @@ const backToHomeBtn = document.getElementById('backToHomeBtn');
 if (backToHomeBtn) backToHomeBtn.addEventListener('click', resetApp);
 const cancelToHomeBtn = document.getElementById('cancelToHomeBtn');
 if (cancelToHomeBtn) cancelToHomeBtn.addEventListener('click', resetApp);
-const cancelToPage3Btn = document.getElementById('cancelToPage3Btn');
-if (cancelToPage3Btn) cancelToPage3Btn.addEventListener('click', () => showPage(page3));
 const restartAdventureBtn = document.getElementById('restartAdventureBtn');
 if (restartAdventureBtn) restartAdventureBtn.addEventListener('click', resetApp);
 
-// 進入召喚殿堂 (Page 4)
-if (nextToPage4Btn) {
-    nextToPage4Btn.addEventListener('click', () => {
-        showPage(page4);
-        initCardAssemblyPage();
-        
-        const ritualDialogue = `「小小配樂家，你一共收集到了 ${adventureState.collectedCards.length} 張像素音樂卡牌！請將卡牌一一放入咒語插槽中，激活專屬的音樂元素吧！」`;
-        const ritualTextEl = document.getElementById('ritualText');
-        if (ritualTextEl) typeWriterEffect(ritualTextEl, ritualDialogue, 25);
-    });
-}
-
 // =========================================
-// 🎴 卡牌收集與插槽召喚系統核心
+// 🎴 階段 1：卡牌融合與插槽系統
 // =========================================
 function initCardAssemblyPage() {
     adventureState.placedCards = [];
-    const deckContainer = document.getElementById('collectedCardsDeck');
-    const slotsContainer = document.getElementById('spellSlotsArea');
-    const promptEl = document.getElementById('resultPrompt');
-    const copyBtn = document.getElementById('copyPromptBtn');
     const placedCountEl = document.getElementById('placedCardCount');
     const totalCountEl = document.getElementById('totalCardCount');
-
-    if (promptEl) promptEl.innerText = "等待注入卡牌解鎖音樂元素...";
-    if (copyBtn) copyBtn.disabled = true;
 
     // 若未獲取任何卡牌的容錯保護
     if (adventureState.collectedCards.length === 0) {
@@ -328,6 +352,11 @@ function initCardAssemblyPage() {
 
     if (totalCountEl) totalCountEl.innerText = adventureState.collectedCards.length;
     if (placedCountEl) placedCountEl.innerText = "0";
+
+    if (nextToSpellPageBtn) {
+        nextToSpellPageBtn.disabled = true;
+        nextToSpellPageBtn.innerText = "🔒 請先注入所有卡牌";
+    }
 
     renderAssemblyUI();
 }
@@ -348,7 +377,7 @@ function renderAssemblyUI() {
 
     // 渲染背包內可點選的卡牌
     if (remainingCards.length === 0) {
-        deckContainer.innerHTML = "<p style='color:#4ade80; font-size:0.8rem; margin:auto;'>✨ 所有音樂卡牌已全部注入魔法陣！</p>";
+        deckContainer.innerHTML = "<p style='color:#4ade80; font-size:0.85rem; margin:auto; padding: 10px;'>✨ 所有卡牌已全部注入！請點擊下方金色按鈕！</p>";
     } else {
         remainingCards.forEach(card => {
             const cardEl = document.createElement('div');
@@ -381,11 +410,10 @@ function placeCardIntoAltar(card) {
     playSpellSound('Piano');
     adventureState.placedCards.push(card);
     renderAssemblyUI();
-    updateSpellScroll(false);
 
-    // 全部卡牌注入完成
+    // 檢驗是否全部放入
     if (adventureState.placedCards.length === adventureState.collectedCards.length) {
-        triggerSummonCompletion();
+        unlockSpellPageButton();
     }
 }
 
@@ -396,49 +424,30 @@ if (injectAllCardsBtn) {
         adventureState.placedCards = [...adventureState.collectedCards];
         playRitualFanfare();
         renderAssemblyUI();
-        updateSpellScroll(true);
-        triggerSummonCompletion();
+        unlockSpellPageButton();
     });
 }
 
-// 動態更新咒語文本
-function updateSpellScroll(isComplete = false) {
-    const promptEl = document.getElementById('resultPrompt');
-    if (!promptEl) return;
-
-    if (adventureState.placedCards.length === 0) {
-        promptEl.innerText = "等待注入卡牌解鎖音樂元素...";
-        return;
-    }
-
-    // 依序組合當前已放入卡牌所代表的樂理描述
-    const baseTheme = `A high quality music track for ${adventureState.moodTitle}. `;
-    const elementsText = adventureState.placedCards.map(c => c.promptSnippet).join(" ");
-    
-    promptEl.innerText = baseTheme + elementsText;
-}
-
-// 召喚成功儀式觸發
-function triggerSummonCompletion() {
-    const copyBtn = document.getElementById('copyPromptBtn');
-    if (copyBtn) copyBtn.disabled = false;
-
+function unlockSpellPageButton() {
     playRitualFanfare();
     if (appContainer) {
         appContainer.classList.add('screen-shake');
         setTimeout(() => appContainer.classList.remove('screen-shake'), 600);
     }
+    if (nextToSpellPageBtn) {
+        nextToSpellPageBtn.disabled = false;
+        nextToSpellPageBtn.innerHTML = "👉 前往下一步：領取魔法咒語";
+    }
+}
 
-    // 生成最終嚴謹的完整 Prompt
+// 階段 2：生成並渲染最終 Prompt
+function generateFinalPromptText() {
+    const promptEl = document.getElementById('resultPrompt');
+    if (!promptEl) return;
+
     const fullFinalPrompt = `A high quality music track for ${adventureState.moodTitle}. ${adventureState.vocal || "Instrumental"}. Main instruments featuring ${adventureState.instrument || "Orchestra"}. ${adventureState.tonality || "Major key"}, ${adventureState.tempo || "Moderate tempo"}, ${adventureState.time_signature || "4/4 time"}. Dynamics: ${adventureState.dynamics || "Balanced"}. Texture: ${adventureState.texture || "Homophonic"}. Form: ${adventureState.form || "Theme and variation"}. Climax: ${adventureState.climax || "Grand ending"}. Atmosphere: ${adventureState.moodPrompt}. Additional SFX: ${adventureState.sfx || "Ambient nature sounds"}.`;
 
-    const promptEl = document.getElementById('resultPrompt');
-    if (promptEl) promptEl.innerText = fullFinalPrompt;
-
-    const ritualTextEl = document.getElementById('ritualText');
-    if (ritualTextEl) {
-        typeWriterEffect(ritualTextEl, "「古代音樂魔導咒語已完全具現化！快點擊下方抄寫咒語，並開啟次元裂縫前往 Suno 聖地吧！」", 25);
-    }
+    promptEl.innerText = fullFinalPrompt;
 }
 
 // =========================================
@@ -641,7 +650,7 @@ const rpgFlow = [
     }
 ];
 
-// 核心評核與卡牌獎勵機制（串接塔羅翻牌特效）
+// 核心評核與卡牌獎勵機制
 function evaluateAndAwardCard(type, selectedValue, cardName, cardIcon, cardTag, promptSnippet, cardDescText) {
     const title = adventureState.moodTitle;
     let isMatched = false;
@@ -692,13 +701,10 @@ function evaluateAndAwardCard(type, selectedValue, cardName, cardIcon, cardTag, 
         const counterEl = document.getElementById('rpgCardCounter');
         if (counterEl) counterEl.innerText = adventureState.collectedCards.length;
 
-        // 🎯 暫存並導向 3D 翻牌特效
         triggerTarotPopUp(cardObj);
     } else {
-        // 若答錯/不契合，不獲得卡牌，直接推進到下個 RPG 步驟
         setTimeout(() => {
             const currentStep = rpgFlow[adventureState.step];
-            // 尋找當前選擇對應的 nextStep 目標
             const chosenOption = currentStep.choices.find(c => c.key === type && c.action);
             const targetNext = chosenOption ? chosenOption.nextStep : (adventureState.step + 1);
             
@@ -707,41 +713,35 @@ function evaluateAndAwardCard(type, selectedValue, cardName, cardIcon, cardTag, 
     }
 }
 
-// 🆕 新增：觸發「塔羅翻牌效果」解鎖視窗
+// 觸發「塔羅翻牌效果」解鎖視窗
 function triggerTarotPopUp(card) {
     if (!cardUnlockOverlay || !unlockTarotCard) return;
 
-    // 1. 重設卡牌狀態 (轉回背面)
     unlockTarotCard.classList.remove('flipped');
     
-    // 2. 注入解鎖卡牌的內容
     if (unlockCardIcon) unlockCardIcon.innerText = card.icon;
     if (unlockCardName) unlockCardName.innerText = card.name;
     if (unlockCardTag) unlockCardTag.innerText = card.tag;
     if (unlockCardDesc) unlockCardDesc.innerText = card.desc;
 
-    // 3. 彈出滿版覆蓋層 (毛玻璃暗化)
     cardUnlockOverlay.classList.remove('hidden-area');
     playRitualFanfare();
 
-    // 4. 延遲啟動 3D 翻牌動畫 (塔羅牌旋轉翻面)
     setTimeout(() => {
         unlockTarotCard.classList.add('flipped');
     }, 450);
 
-    // 5. 紀錄下一個 RPG 關卡索引
     const currentStep = rpgFlow[adventureState.step];
     const chosenOption = currentStep.choices.find(c => c.key === card.id);
     nextStepIndexAfterUnlock = chosenOption ? chosenOption.nextStep : (adventureState.step + 1);
 }
 
-// 🆕 新增：點擊「收下卡牌」按鈕，隱藏並前進
+// 點擊「收下卡牌」按鈕
 if (confirmUnlockBtn) {
     confirmUnlockBtn.addEventListener('click', () => {
         playSpellSound('Piano');
         if (cardUnlockOverlay) cardUnlockOverlay.classList.add('hidden-area');
         
-        // 推進至下個 RPG 步驟
         if (nextStepIndexAfterUnlock !== null) {
             nextStepIndexAfterUnlock === 12 ? triggerEvaluationReveal() : renderRPGStep(nextStepIndexAfterUnlock);
             nextStepIndexAfterUnlock = null;
@@ -794,7 +794,6 @@ function renderRPGStep(stepIndex) {
                 if (choice.key && choice.value) adventureState[choice.key] = choice.value;
                 if (choice.sound) playSpellSound(choice.sound);
                 
-                // 如果沒有觸發 evaluateAndAwardCard (即 event 步驟或 intro 步驟)，手動推進
                 if (!choice.key) {
                     choice.nextStep === 12 ? triggerEvaluationReveal() : renderRPGStep(choice.nextStep);
                 }
@@ -845,12 +844,12 @@ function triggerEvaluationReveal() {
     
     showPage(page3); 
     
-    const evalDialogue = `「太棒了！你在 10 道考驗中一共贏得了 ${adventureState.collectedCards.length} 張像素音樂卡牌，榮獲【${titleText}】階級！現在前往魔法公會將卡牌注入魔法陣，合成終極咒語吧！」`;
+    const evalDialogue = `「太棒了！你在 10 道考驗中一共贏得了 ${adventureState.collectedCards.length} 張像素音樂卡牌，榮獲【${titleText}】階級！現在前往第一步將卡牌注入魔法陣吧！」`;
     const evalTextEl = document.getElementById('evalTutorText');
     if (evalTextEl) typeWriterEffect(evalTextEl, evalDialogue, 30);
 }
 
-// 🔮 異步向 Google 試算表拉取最新數據
+// 異步向 Google 試算表拉取最新數據
 async function fetchWallData() {
     const wall = document.getElementById('wallContainer');
     if (!wall) return;
@@ -868,7 +867,7 @@ async function fetchWallData() {
     }
 }
 
-// 🎨 渲染靈感牆
+// 渲染靈感牆
 function renderWall() {
     const wall = document.getElementById('wallContainer');
     if (!wall) return;
