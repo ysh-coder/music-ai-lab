@@ -20,7 +20,7 @@
     <div id="ff-canvas-container" class="animated-bg"></div>
     <div id="retro-bg" class="retro-bg hidden-area"></div>
 
-    <!-- 🧙‍♂️ 新增：答對題目時彈出的「塔羅翻牌效果」解鎖視窗 -->
+    <!-- 🧙‍♂️ 答對題目時彈出的「塔羅翻牌效果」解鎖視窗 -->
     <div id="cardUnlockOverlay" class="unlock-overlay hidden-area">
         <div class="unlock-card-container">
             <h3 class="unlock-overlay-title">✨ 獲得音樂法力卡牌！ ✨</h3>
@@ -75,11 +75,9 @@
                 <p class="subtitle">這就是你今天的創作主題！</p>
                 <div class="card-container">
                     <div class="playing-card" id="moodCard">
-                        <!-- 🃏 卡牌背面 -->
                         <div class="card-face card-back-design">
                             <img src="卡片背面.jfif" alt="卡片背面" class="full-card-back-img">
                         </div>
-                        <!-- 🃏 卡牌正面 -->
                         <div class="card-face card-front-design">
                             <div class="mood-img-wrap">
                                 <img id="moodImg" src="" alt="氣氛插畫" class="mood-card-img">
@@ -141,7 +139,7 @@
             </div>
 
             <div class="retro-evaluation-board">
-                <div class="eval-title">🎯 能力評核結果</div>
+                <div class="eval-title">🎯 評核等級結算</div>
                 <div class="eval-row" style="font-size: 1.15rem; padding: 10px 0;">
                     <span>🔍 探究解難能力:</span>
                     <span class="eval-score" id="problemSolvingScore">0 / 5 分</span>
@@ -154,32 +152,37 @@
 
             <div class="button-group retro-footer" style="margin-top: 30px;">
                 <button id="cancelToHomeBtn" class="retro-btn-escape">逃跑 (返回首頁)</button>
-                <button id="nextToPage4Btn" class="retro-choice-btn" style="flex: 1.5; justify-content: center;">👉 下一步：前往召喚殿堂</button>
+                <button id="nextToPage4Btn" class="retro-choice-btn" style="flex: 1.5; justify-content: center;">👉 第一步：前往卡牌融合陣</button>
             </div>
         </section>
 
-        <!-- 頁面 4：輸入魔法咒語與 Suno 創作頁面 -->
+        <!-- 頁面 4：【獨立頁面一】卡牌融合與插槽注入 -->
         <section id="page4" class="page retro-page hidden">
-            <h2 class="retro-title">=== 禁忌魔法 召喚殿堂 ===</h2>
-            <div class="rpg-main-layout" style="margin-bottom: 12px;">
-                <div class="tutor-avatar retro-avatar" style="margin-bottom: 0;">
-                    <img src="Gemini_Generated_Image_rtdwrqrtdwrqrtdw.jfif" alt="魔法師翁sir" class="pixel-wizard-img" style="width: 65px; height: 65px;">
+            <h2 class="retro-title">=== 階段 1：卡牌融合陣 ===</h2>
+            <div class="rpg-main-layout" style="margin-bottom: 10px;">
+                <div class="tutor-avatar retro-avatar">
+                    <img src="Gemini_Generated_Image_rtdwrqrtdwrqrtdw.jfif" alt="魔法師翁sir" class="pixel-wizard-img" style="width: 60px; height: 60px;">
                 </div>
-                <div class="dialogue-box retro-dialogue" style="min-height: 65px; background: #0000aa;">
-                    <h3 id="ritualTutorName" style="color: #ffff00;">▶ 魔法師翁sir</h3>
-                    <p id="ritualText" style="color: #fff; font-size: 0.85rem;">...</p>
+                <div class="dialogue-box retro-dialogue" style="min-height: 60px; background: #0000aa;">
+                    <h3 style="color: #ffff00; font-size: 0.95rem;">▶ 魔法師翁sir</h3>
+                    <p style="color: #fff; font-size: 0.85rem;" id="step1Dialogue">「點選下方卡牌一張張放入插槽，或直接點『⚡ 一鍵全部注入』！」</p>
                 </div>
             </div>
 
-            <!-- 🎴 卡牌收集背包與魔法陣插槽區 -->
+            <div class="retro-guidance-card">
+                <span style="color: #ffd700; font-weight: bold;">💡 中一生通關秘訣：</span>
+                點擊卡牌會注入插槽並發光。當全部卡牌放滿後，即可開啟下一步！
+            </div>
+
+            <!-- 卡牌背包與插槽區 -->
             <div class="card-assembly-module">
                 <div class="assembly-header">
-                    <span>🎒 學徒卡牌背包 (點擊卡牌注入魔法陣)</span>
-                    <button type="button" id="injectAllCardsBtn" class="retro-mini-btn">⚡ 一鍵全部注入</button>
+                    <span>🎒 你的像素卡牌背包 (點擊卡牌注入)</span>
+                    <button type="button" id="injectAllCardsBtn" class="retro-mini-btn" style="background: #ffd700; color: #000; font-weight: bold; border-color: #ffd700;">⚡ 一鍵全部注入</button>
                 </div>
                 <div id="collectedCardsDeck" class="cards-deck-flex"></div>
 
-                <div class="altar-slots-header">🔮 咒語魔法陣插槽 (<span id="placedCardCount">0</span>/<span id="totalCardCount">0</span>)</div>
+                <div class="altar-slots-header">🔮 魔法陣插槽進度 (<span id="placedCardCount">0</span>/<span id="totalCardCount">0</span>)</div>
                 <div id="spellSlotsArea" class="spell-slots-grid"></div>
             </div>
 
@@ -187,44 +190,124 @@
                 <div class="pixel-magic-circle" id="magicCircle">✦ ✧ ✦ ✧ ✦ ✧ ✦</div>
             </div>
 
-            <!-- 咒語卷軸箱 -->
-            <div class="retro-scroll-box">
-                <div class="scroll-header">📜 【古代音樂魔導咒語】</div>
-                <p id="resultPrompt" class="retro-spell-content">等待注入卡牌解鎖音樂元素...</p>
-                <button id="copyPromptBtn" class="retro-action-btn" disabled>📋 抄寫咒語 (複製)</button>
-            </div>
-
-            <div class="retro-portal-box">
-                <p style="color: #00ffff; font-size: 0.85rem; margin-bottom: 8px;">⚡ 次元裂縫已開啟，前往 Suno 聖地具現化音樂：</p>
-                <a href="https://suno.com/create" target="_blank" style="text-decoration: none;">
-                    <button type="button" class="retro-portal-btn">🌀 開氣次元裂縫 (前往 Suno)</button>
-                </a>
-            </div>
-
-            <div class="retro-monument-box">
-                <div class="scroll-header" style="color: #ffd700; margin-bottom: 10px;">🗿 【刻入公會靈感石碑】</div>
-                <div style="text-align: left; margin-bottom: 12px;">
-                    <label style="color: #fff; font-size: 0.95rem; display: block; margin-bottom: 6px;">▶ 請輸入學徒代號 (姓名):</label>
-                    <input type="text" id="authorName" class="retro-input" placeholder="請輸入姓名..." style="width: 100%; font-size: 0.95rem;">
-                </div>
-                <input type="hidden" id="sunoUrlInput" value="">
-                <div style="margin-bottom: 12px;">
-                    <button type="button" id="quickPasteBtn" class="retro-btn-escape" style="border: 1px dashed #00ffff; color: #00ffff; padding: 8px 12px; width: 100%; font-size: 0.85rem; cursor: pointer; text-align: center;">
-                        🔗 點擊載入已複製的 Suno 歌曲連結
-                    </button>
-                    <p id="urlStatusText" style="color: #4ade80; font-size: 0.8rem; margin-top: 5px; display: none; text-align: center;">✨ 已成功注入歌曲共鳴！</p>
-                </div>
-                <button id="uploadWallBtn" class="retro-action-btn" style="background: #ffd700; color: #000; font-weight: bold; padding: 12px;">
-                    🔮 刻入魔法石碑 (生成二維碼)
-                </button>
-            </div>
-
+            <!-- 注入完成後解鎖此按鈕 -->
             <div class="button-group retro-footer" style="margin-top: 15px;">
                 <button id="cancelToPage3Btn" class="retro-btn-escape">返回能力結算</button>
+                <button type="button" id="nextToSpellPageBtn" class="retro-choice-btn glowing-action-btn" style="flex: 1.5; justify-content: center;" disabled>
+                    🔒 請先注入所有卡牌
+                </button>
             </div>
         </section>
 
-        <!-- 頁面 5：靈感牆 -->
+        <!-- 頁面 5：【獨立頁面二】領取咒語與前往 Suno 創作 -->
+        <section id="page-spell" class="page retro-page hidden">
+            <h2 class="retro-title">=== 階段 2：領取咒語與 Suno 創作 ===</h2>
+            <div class="rpg-main-layout" style="margin-bottom: 10px;">
+                <div class="tutor-avatar retro-avatar">
+                    <img src="Gemini_Generated_Image_rtdwrqrtdwrqrtdw.jfif" alt="魔法師翁sir" class="pixel-wizard-img" style="width: 60px; height: 60px;">
+                </div>
+                <div class="dialogue-box retro-dialogue" style="min-height: 60px; background: #0000aa;">
+                    <h3 style="color: #ffff00; font-size: 0.95rem;">▶ 魔法師翁sir</h3>
+                    <p style="color: #fff; font-size: 0.85rem;" id="step2Dialogue">「古代咒語已調配完成！跟著底下 3 個步驟，去 Suno 創造你的神曲吧！」</p>
+                </div>
+            </div>
+
+            <!-- 中一生專屬 3 步驟圖文指示板 -->
+            <div class="step-guide-container">
+                <div class="step-guide-row">
+                    <div class="step-badge">步驟 1</div>
+                    <div class="step-desc-text">點擊下方黃色按鈕，將音樂咒語<strong>完整複製</strong>到剪貼簿。</div>
+                </div>
+                <div class="step-guide-row">
+                    <div class="step-badge">步驟 2</div>
+                    <div class="step-desc-text">點擊藍色傳送門<strong>前往 Suno 網站</strong>，在描述框中「貼上」並生成音樂。</div>
+                </div>
+                <div class="step-guide-row">
+                    <div class="step-badge">步驟 3</div>
+                    <div class="step-desc-text">在 Suno 歌曲旁點擊 <strong>Share ➡️ Copy Link</strong>，然後回到本頁點「下一步」！</div>
+                </div>
+            </div>
+
+            <!-- 咒語卷軸展示與一鍵複製 -->
+            <div class="retro-scroll-box" style="margin-top: 10px;">
+                <div class="scroll-header">📜 【你的專屬古代音樂咒語】</div>
+                <p id="resultPrompt" class="retro-spell-content">正在匯聚樂理元素咒語...</p>
+                <button id="copyPromptBtn" class="retro-action-btn" style="background: #ffd700; color: #000; font-weight: bold; padding: 12px; font-size: 1.05rem;">
+                    📋 步驟 1：點此抄寫咒語 (複製到剪貼簿)
+                </button>
+            </div>
+
+            <!-- 前往 Suno 傳送門 -->
+            <div class="retro-portal-box" style="margin-top: 10px;">
+                <p style="color: #00ffff; font-size: 0.85rem; margin-bottom: 8px;">⚡ 步驟 2：次元裂縫已開啟（會在新分頁開啟 Suno）：</p>
+                <a href="https://suno.com/create" target="_blank" style="text-decoration: none;">
+                    <button type="button" class="retro-portal-btn" style="padding: 12px; font-size: 1rem; font-weight: bold;">
+                        🌀 步驟 2：開啟次元裂縫 (前往 Suno 貼上製作)
+                    </button>
+                </a>
+            </div>
+
+            <div class="button-group retro-footer" style="margin-top: 20px;">
+                <button id="backToPage4Btn" class="retro-btn-escape">返回卡牌融合</button>
+                <button type="button" id="nextToMonumentPageBtn" class="retro-choice-btn" style="flex: 1.5; justify-content: center; background: #22c55e; color: #fff; border-color: #4ade80;">
+                    👉 步驟 3：我已做好音樂，下一步登記作品
+                </button>
+            </div>
+        </section>
+
+        <!-- 頁面 6：【獨立頁面三】刻入公會石碑與生成二維碼 -->
+        <section id="page-monument" class="page retro-page hidden">
+            <h2 class="retro-title">=== 階段 3：刻入靈感石碑 ===</h2>
+            <div class="rpg-main-layout" style="margin-bottom: 10px;">
+                <div class="tutor-avatar retro-avatar">
+                    <img src="Gemini_Generated_Image_rtdwrqrtdwrqrtdw.jfif" alt="魔法師翁sir" class="pixel-wizard-img" style="width: 60px; height: 60px;">
+                </div>
+                <div class="dialogue-box retro-dialogue" style="min-height: 60px; background: #0000aa;">
+                    <h3 style="color: #ffff00; font-size: 0.95rem;">▶ 魔法師翁sir</h3>
+                    <p style="color: #fff; font-size: 0.85rem;" id="step3Dialogue">「最後一步！寫下你的代號並載入音樂連結，你的專屬二維碼就會誕生！」</p>
+                </div>
+            </div>
+
+            <div class="retro-monument-box">
+                <div class="scroll-header" style="color: #ffd700; margin-bottom: 10px; font-size: 1.05rem;">🗿 【填寫學徒登記表】</div>
+                
+                <div style="text-align: left; margin-bottom: 15px;">
+                    <label style="color: #fff; font-size: 0.95rem; display: block; margin-bottom: 6px;">
+                        ▶ 1. 請輸入學徒姓名與班別：
+                    </label>
+                    <input type="text" id="authorName" class="retro-input" placeholder="例如：1A 陳大文" style="width: 100%; font-size: 1rem; padding: 10px;">
+                </div>
+
+                <input type="hidden" id="sunoUrlInput" value="">
+                
+                <div style="text-align: left; margin-bottom: 15px;">
+                    <label style="color: #fff; font-size: 0.95rem; display: block; margin-bottom: 6px;">
+                        ▶ 2. 注入你的 Suno 歌曲連結：
+                    </label>
+                    <button type="button" id="quickPasteBtn" class="retro-btn-escape" style="border: 2px dashed #00ffff; color: #00ffff; padding: 12px; width: 100%; font-size: 0.95rem; cursor: pointer; text-align: center; background: #05051a;">
+                        🔗 點擊這裡：自動載入剛剛複製的 Suno 連結
+                    </button>
+                    <p id="urlStatusText" style="color: #4ade80; font-size: 0.85rem; margin-top: 6px; display: none; text-align: center; font-weight: bold;">
+                        ✨ 已成功載入音樂共鳴！
+                    </p>
+                </div>
+
+                <div style="text-align: left; margin-bottom: 5px;">
+                    <label style="color: #fff; font-size: 0.95rem; display: block; margin-bottom: 6px;">
+                        ▶ 3. 刻入石碑並生成作品二維碼：
+                    </label>
+                    <button id="uploadWallBtn" class="retro-action-btn" style="background: #ffd700; color: #000; font-weight: bold; padding: 14px; font-size: 1.1rem;">
+                        🔮 刻入魔法石碑 (生成 QR Code)
+                    </button>
+                </div>
+            </div>
+
+            <div class="button-group retro-footer" style="margin-top: 15px;">
+                <button id="backToSpellBtn" class="retro-btn-escape">返回咒語與 Suno</button>
+            </div>
+        </section>
+
+        <!-- 頁面 7：靈感牆 -->
         <section id="page5" class="page hidden">
             <h2>🌟 音樂靈感牆</h2>
             <p class="subtitle">拿出手機，掃描卡片上的二維碼 (QR Code) 聆聽大家的作品吧！</p>
