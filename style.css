@@ -286,9 +286,6 @@ button {
 .pixel-wizard-img { width: 80px; height: 80px; image-rendering: pixelated; border: 3px solid #ffd700; border-radius: 8px; background: #000; box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); object-fit: cover; }
 .retro-dialogue { background: #0000aa; border: 4px solid #fff; padding: 10px 15px !important; width: 100%; text-align: left; margin-bottom: 0px !important; min-height: 90px !important; box-shadow: inset 4px 4px 0px rgba(0,0,0,0.5); }
 
-#tutorName, #ritualTutorName, #evalTutorName { color: #ffff00; font-size: 1rem; margin-bottom: 5px; text-shadow: 2px 2px 0 #000; }
-#tutorText, #ritualText, #evalTutorText { font-size: 0.95rem; line-height: 1.5; color: #fff; text-shadow: 2px 2px 0 #000; }
-
 .typing-cursor::after { content: '▍'; animation: blink 1s step-end infinite; }
 @keyframes blink { 50% { opacity: 0; } }
 
@@ -300,13 +297,64 @@ button {
     width: 100% !important; 
 }
 .retro-choice-btn { background: #000; border: 2px solid #fff; color: #fff; padding: 10px 12px; font-size: 0.85rem; cursor: pointer; text-align: left; display: flex; align-items: center; transition: none; }
-.retro-choice-btn:hover { background: #fff; color: #000; }
+.retro-choice-btn:hover:not(:disabled) { background: #fff; color: #000; }
 .retro-choice-btn::before { content: "　"; margin-right: 6px; }
-.retro-choice-btn:hover::before { content: "▶"; color: #000; }
+.retro-choice-btn:hover:not(:disabled)::before { content: "▶"; color: #000; }
 
 .retro-footer { margin-top: 15px; display: flex; gap: 10px; width: 100%; }
 .retro-btn-escape { background: transparent; border: 2px dashed #888; color: #aaa; padding: 8px; margin-top: 0px; cursor: pointer; font-size: 0.9rem; flex: 1; text-align: center; }
 .retro-btn-escape:hover { color: #fff; border-color: #fff; }
+
+/* 🔮 中一生專屬：3 步驟引導面板 */
+.step-guide-container {
+    background: #0b1329;
+    border: 2px solid #38bdf8;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    text-align: left;
+}
+.step-guide-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+    color: #e0f2fe;
+}
+.step-guide-row:last-child { margin-bottom: 0; }
+.step-badge {
+    background: #0284c7;
+    color: #fff;
+    padding: 2px 8px;
+    font-size: 0.75rem;
+    border-radius: 4px;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+.step-desc-text { line-height: 1.3; }
+
+.retro-guidance-card {
+    background: #18181b;
+    border: 1px dashed #ffd700;
+    color: #e4e4e7;
+    padding: 8px 12px;
+    margin-bottom: 12px;
+    font-size: 0.85rem;
+    text-align: left;
+    line-height: 1.4;
+}
+
+.glowing-action-btn:not(:disabled) {
+    background: #ffd700 !important;
+    color: #000 !important;
+    font-weight: bold !important;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+    animation: pulseBtn 1.5s infinite ease-in-out;
+}
+@keyframes pulseBtn {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.03); box-shadow: 0 0 22px rgba(255, 215, 0, 0.9); }
+}
 
 /* 🔮 答對題目時彈出的「塔羅翻牌」滿版特效樣式 */
 .unlock-overlay {
@@ -335,7 +383,6 @@ button {
     text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
 }
 
-/* 🃏 3D 翻轉透視盒 */
 .unlock-perspective-box {
     perspective: 1000px;
     -webkit-perspective: 1000px;
@@ -351,9 +398,7 @@ button {
     transform-style: preserve-3d;
     -webkit-transform-style: preserve-3d;
 }
-.unlock-playing-card.flipped {
-    transform: rotateY(180deg) scale(1.05);
-}
+.unlock-playing-card.flipped { transform: rotateY(180deg) scale(1.05); }
 .unlock-card-face {
     position: absolute;
     width: 100%;
@@ -392,7 +437,6 @@ button {
     transition: opacity 0.3s ease 0.3s;
 }
 
-/* 塔羅牌內部精緻 8-bit 風格排版 */
 .unlock-card-inner {
     padding: 12px;
     height: 100%;
@@ -406,25 +450,9 @@ button {
     margin-top: 15px;
     animation: floatingIcon 2.5s ease-in-out infinite;
 }
-.unlock-card-name {
-    font-size: 1.1rem;
-    color: #ffd700;
-    font-weight: bold;
-}
-.unlock-card-tag {
-    font-size: 0.75rem;
-    color: #00ffff;
-    background: #0000aa;
-    padding: 3px 10px;
-    border: 1px solid #00ffff;
-}
-.unlock-card-desc {
-    font-size: 0.8rem;
-    color: #ccc;
-    line-height: 1.4;
-    text-align: center;
-    margin-bottom: 10px;
-}
+.unlock-card-name { font-size: 1.1rem; color: #ffd700; font-weight: bold; }
+.unlock-card-tag { font-size: 0.75rem; color: #00ffff; background: #0000aa; padding: 3px 10px; border: 1px solid #00ffff; }
+.unlock-card-desc { font-size: 0.8rem; color: #ccc; line-height: 1.4; text-align: center; margin-bottom: 10px; }
 
 /* 🎴 卡牌收集與插槽樣式 */
 .card-assembly-module {
@@ -448,15 +476,12 @@ button {
     background: #000;
     border: 1px solid #00ffff;
     color: #00ffff;
-    padding: 3px 8px;
-    font-size: 0.75rem;
+    padding: 5px 10px;
+    font-size: 0.8rem;
     cursor: pointer;
     border-radius: 4px;
 }
-.retro-mini-btn:hover {
-    background: #00ffff;
-    color: #000;
-}
+.retro-mini-btn:hover { background: #00ffff; color: #000; }
 .cards-deck-flex {
     display: flex;
     gap: 8px;
@@ -492,11 +517,7 @@ button {
 .pixel-chip-name { font-size: 0.65rem; color: #fff; line-height: 1.1; }
 .pixel-chip-tag { font-size: 0.55rem; color: #38bdf8; background: #1e293b; border-radius: 2px; }
 
-.altar-slots-header {
-    color: #ffd700;
-    font-size: 0.85rem;
-    margin: 10px 0 6px;
-}
+.altar-slots-header { color: #ffd700; font-size: 0.85rem; margin: 10px 0 6px; }
 .spell-slots-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
@@ -545,18 +566,18 @@ button {
     50% { transform: scale(1.1); opacity: 1; text-shadow: 0 0 20px #ff00ea; }
 }
 
-.retro-scroll-box { background: #111; border: 3px double #ffd700; padding: 10px 15px; margin-bottom: 10px; text-align: left; }
+.retro-scroll-box { background: #111; border: 3px double #ffd700; padding: 12px 15px; margin-bottom: 10px; text-align: left; }
 .scroll-header { font-size: 0.95rem; color: #ffd700; margin-bottom: 6px; }
 .retro-spell-content { font-size: 0.88rem; color: #fff; line-height: 1.5; margin-bottom: 10px; min-height: 48px; }
 .retro-action-btn { width: 100%; background: #000; border: 2px solid #ffd700; color: #ffd700; padding: 10px; font-size: 1rem; cursor: pointer; transition: none; }
 .retro-action-btn:hover:not(:disabled) { background: #ffd700; color: #000; }
 .retro-action-btn:disabled { border-color: #555; color: #555; cursor: not-allowed; }
 
-.retro-portal-box { background: #05051a; border: 2px solid #00ffff; padding: 10px; margin-bottom: 10px; text-align: center; }
-.retro-portal-btn { width: 100%; background: #000; border: 2px solid #00ffff; color: #00ffff; padding: 8px; font-size: 0.95rem; cursor: pointer; }
+.retro-portal-box { background: #05051a; border: 2px solid #00ffff; padding: 12px; margin-bottom: 10px; text-align: center; }
+.retro-portal-btn { width: 100%; background: #000; border: 2px solid #00ffff; color: #00ffff; padding: 10px; font-size: 0.95rem; cursor: pointer; }
 .retro-portal-btn:hover { background: #00ffff; color: #000; }
 
-.retro-monument-box { background: #1a1a1a; border: 2px dashed #aaa; padding: 10px 15px; margin-bottom: 10px; }
+.retro-monument-box { background: #1a1a1a; border: 2px dashed #aaa; padding: 12px 15px; margin-bottom: 10px; }
 .retro-input { width: 100%; background: #000; border: 2px solid #fff; color: #ffd700; padding: 8px; font-size: 0.9rem; margin-top: 3px; outline: none; }
 .retro-input:focus { border-color: #ffd700; }
 
@@ -581,12 +602,8 @@ button {
 /* 📱 RWD 微調 */
 @media screen and (max-height: 800px) {
     .retro-page { padding: 12px !important; }
-    .retro-scene-banner { max-height: 85px !important; }
-    .pixel-wizard-img { width: 60px !important; height: 60px !important; }
-    .retro-dialogue { min-height: 65px !important; padding: 6px 12px !important; }
-    #tutorText, #ritualText, #evalTutorText { font-size: 0.85rem !important; }
-    .pixel-magic-circle { font-size: 0.95rem !important; }
-    .retro-scroll-box { padding: 8px 12px !important; }
-    .retro-input { padding: 6px !important; }
-    .pixel-card-chip { width: 60px; height: 74px; }
+    .retro-scene-banner { max-height: 80px !important; }
+    .pixel-wizard-img { width: 55px !important; height: 55px !important; }
+    .retro-dialogue { min-height: 55px !important; padding: 6px 10px !important; }
+    .pixel-card-chip { width: 58px; height: 72px; }
 }
