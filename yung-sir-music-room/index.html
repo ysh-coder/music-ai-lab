@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="zh-Hant-HK">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#171712">
+  <meta name="description" content="翁Sir行走的音樂室。由中一到中三，按年級和學期找回每一堂音樂課。">
+  <title>翁Sir行走的音樂室</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script src="lessons.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#courses">跳到課題索引</a>
+  <header class="site-header" id="top">
+    <div class="header-inner">
+      <a href="#top" class="wordmark">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l10-2v12M9 9l10-2"/><ellipse cx="6.5" cy="18.5" rx="2.5" ry="1.5"/><ellipse cx="16.5" cy="16.5" rx="2.5" ry="1.5"/></svg></span>
+        <span>翁Sir行走的音樂室<span class="wordmark-en">YUNG SIR’S MUSIC ROOM</span></span>
+      </a>
+      <nav aria-label="主要導覽"><a href="#courses" class="header-link">課題索引 <span aria-hidden="true">↗</span></a></nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="journey" aria-labelledby="hero-title">
+      <div class="hero-stage">
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <p class="eyebrow hero-label"><span></span> THE WALKING MUSIC ROOM</p>
+            <h1 id="hero-title">翁Sir<br>行走的<span>音樂室</span></h1>
+            <p class="hero-intro">跟翁Sir推開門，一齊聽、一齊玩。<br>由中一到中三，搵返每一堂音樂課。</p>
+            <div class="hero-actions">
+              <a href="#courses" class="entry-button" id="enter-room">推門入場 <span aria-hidden="true">↗</span></a>
+              <a href="#courses" class="quiet-link">直接看課題 <span aria-hidden="true">↓</span></a>
+            </div>
+          </div>
+
+          <div class="portal-scene" aria-hidden="true">
+            <div class="portal-overline"><span>THE ENTRANCE</span><span>01 / 02</span></div>
+            <div class="portal">
+              <img class="hall-view" src="assets/music-hallway.webp" width="1536" height="1024" alt="" fetchpriority="high">
+              <div class="doorway">
+                <div class="room-view">
+                  <img src="assets/music-room.webp" width="1536" height="1024" alt="">
+                </div>
+                <div class="door door-left"><div class="door-glass"></div><div class="door-panel"></div><i class="door-handle"></i></div>
+                <div class="door door-right"><div class="door-glass"></div><div class="door-panel"></div><i class="door-handle"></i></div>
+                <div class="door-seam"></div>
+              </div>
+              <div class="doorway-light"></div>
+              <div class="guide portal-guide">
+                <img class="guide-pose pose-greet" src="assets/yung-sir-greet.webp" width="480" height="640" alt="" fetchpriority="high">
+                <img class="guide-pose pose-push" src="assets/yung-sir-door-push.webp" width="480" height="640" alt="" decoding="async">
+                <img class="guide-pose pose-step-a" src="assets/yung-sir-step-a.webp" width="480" height="640" alt="" decoding="async">
+                <img class="guide-pose pose-step-b" src="assets/yung-sir-step-b.webp" width="480" height="640" alt="" decoding="async">
+              </div>
+              <div class="portal-vignette"></div>
+            </div>
+            <div class="portal-caption"><span class="status-dot"></span> YUNG SIR <span class="portal-line"></span><span>01</span></div>
+          </div>
+        </div>
+        <div class="arrival" id="arrival" aria-hidden="true" inert>
+          <div class="arrival-camera" aria-hidden="true">
+            <div class="room-shot">
+              <img class="arrival-image" src="assets/music-room.webp" width="1536" height="1024" alt="">
+              <div class="guide room-guide">
+                <img class="guide-pose pose-greet" src="assets/yung-sir-room-welcome.webp" width="480" height="640" alt="" decoding="async">
+                <img class="guide-pose pose-step-a" src="assets/yung-sir-step-a.webp" width="480" height="640" alt="">
+                <img class="guide-pose pose-step-b" src="assets/yung-sir-step-b.webp" width="480" height="640" alt="">
+              </div>
+            </div>
+          </div>
+          <div class="arrival-shade" aria-hidden="true"></div>
+          <div class="arrival-inner">
+            <p class="eyebrow">02 / INSIDE THE MUSIC ROOM</p>
+            <p class="arrival-title">入到嚟喇。</p>
+            <a href="#courses" class="entry-button" id="arrival-link">揀選音樂課 <span aria-hidden="true">↓</span></a>
+          </div>
+        </div>
+        <div class="hero-footer" aria-hidden="true"><span>01 — THE ENTRANCE</span><span>捲動進入 <b>↓</b></span><span class="door-progress"><i></i></span></div>
+      </div>
+    </section>
+
+    <section class="courses" id="courses" aria-labelledby="courses-title">
+      <div class="content-shell">
+        <div class="section-strip"><span><i></i> 02 / THE LESSON INDEX</span><span>中一至中三 · 上下學期</span></div>
+        <div class="section-intro">
+          <div><p class="eyebrow">THE LESSON INDEX</p><h2 id="courses-title">音樂課題索引</h2></div>
+          <p>揀選你的年級和學期，查看學習重點同工作紙。<br><a class="resource-link" href="#instrument-notes">跳到樂器筆記 <span aria-hidden="true">↓</span></a></p>
+        </div>
+        <noscript><p>請啟用瀏覽器的 JavaScript，以使用課題索引。</p></noscript>
+        <div class="catalog" id="catalog" hidden>
+          <div class="catalog-controls">
+            <div class="control-group">
+              <h3 id="grade-label">01 <span>選擇年級</span></h3>
+              <div class="grade-options" role="group" aria-labelledby="grade-label">
+                <button type="button" data-grade="1" aria-pressed="true"><span>S1</span>中一</button>
+                <button type="button" data-grade="2" aria-pressed="false"><span>S2</span>中二</button>
+                <button type="button" data-grade="3" aria-pressed="false"><span>S3</span>中三</button>
+              </div>
+            </div>
+            <div class="control-group">
+              <h3 id="term-label">02 <span>選擇學期</span></h3>
+              <div class="term-options" role="group" aria-labelledby="term-label">
+                <button type="button" data-term="1" aria-pressed="true">上學期</button>
+                <button type="button" data-term="2" aria-pressed="false">下學期</button>
+              </div>
+            </div>
+          </div>
+          <div class="semester-heading">
+            <p class="eyebrow" id="semester-code"></p>
+            <h3 id="semester-title"></h3>
+            <p id="semester-meta" aria-live="polite"></p>
+          </div>
+          <div class="lesson-list" id="lesson-list"></div>
+        </div>
+        <section class="instrument-notes" id="instrument-notes" aria-labelledby="notes-title" hidden>
+          <p class="eyebrow">REFERENCE NOTES</p>
+          <h3 id="notes-title">樂器筆記</h3>
+          <p>按樂器類別揀選筆記。PDF 原件會喺 Google Drive 開啟。</p>
+          <div class="lesson-list" id="notes-list"></div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer"><div class="content-shell footer-inner"><span>翁Sir行走的音樂室</span><a href="#top">返回入口 <span aria-hidden="true">↑</span></a></div></footer>
+
+  <template id="lesson-template">
+    <details class="lesson">
+      <summary>
+        <span class="lesson-number"></span>
+        <span class="lesson-title"></span>
+        <span class="lesson-tag"></span>
+        <span class="lesson-expand" aria-hidden="true"></span>
+      </summary>
+      <div class="lesson-content">
+        <div><h4>學習重點</h4><p class="lesson-goal"></p></div>
+        <div><h4>課堂活動</h4><p class="lesson-activity"></p></div>
+        <a class="resource-link" target="_blank" rel="noopener noreferrer" hidden>在 Google Drive 開啟工作紙 <span aria-hidden="true">↗</span></a>
+      </div>
+    </details>
+  </template>
+</body>
+</html>
